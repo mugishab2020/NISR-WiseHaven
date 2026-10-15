@@ -142,14 +142,6 @@ export default function Hero() {
 
           {/* ── Left: Copy ── */}
           <div className="flex flex-col gap-6 hero-enter">
-            {/* Eyebrow */}
-            <div className="inline-flex items-center gap-2 self-start px-3 py-1.5 rounded-full bg-[#BEF532]/8 border border-[#BEF532]/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#BEF532] animate-pulse" />
-              <span className="text-[#BEF532] text-[11px] font-mono font-semibold uppercase tracking-wider">
-                Built for Rwanda · Powered by commitment
-              </span>
-            </div>
-
             {/* Headline */}
             <h1
               id="hero-headline"
