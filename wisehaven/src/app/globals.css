@@ -1,9 +1,10 @@
+/* ── Google Fonts ─────────────────────────────────────────── */
+/* @import must come before all other rules (CSS spec + PostCSS requirement) */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* ── Google Fonts ─────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 /* ── Base resets ──────────────────────────────────────────── */
 @layer base {
