@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Lock, Shield, Zap } from "lucide-react";
+import HeroOrbit from "./HeroOrbit";
 
 // ── Dashboard mockup ─────────────────────────────────────────
 function DashboardMockup() {
@@ -10,9 +11,11 @@ function DashboardMockup() {
     <div className="relative w-full select-none" aria-hidden="true">
 
       {/* Main dashboard card */}
-      <div className="relative bg-[#111111] border border-[#242424] rounded-2xl overflow-hidden shadow-2xl hero-float">
+      <div className="relative bg-[#111111]/90 border border-[#2a2a2a] rounded-2xl overflow-hidden shadow-2xl hero-float backdrop-blur-sm"
+        style={{ boxShadow: "0 0 0 1px rgba(190,245,50,0.06), 0 32px 64px rgba(0,0,0,0.7)" }}
+      >
         {/* Ambient glow */}
-        <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#BEF532]/5 blur-3xl pointer-events-none" />
+        <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#BEF532]/6 blur-3xl pointer-events-none" />
 
         {/* Header bar */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#1e1e1e]">
@@ -90,8 +93,8 @@ function DashboardMockup() {
 
       {/* Floating vault card */}
       <div
-        className="absolute -bottom-4 -left-4 bg-[#171717] border border-[#242424] rounded-xl p-3 w-36 shadow-xl hero-float"
-        style={{ animationDelay: "0.4s" }}
+        className="absolute -bottom-4 -left-4 bg-[#171717]/90 border border-[#2a2a2a] rounded-xl p-3 w-36 shadow-xl hero-float backdrop-blur-sm"
+        style={{ animationDelay: "0.4s", boxShadow: "0 0 0 1px rgba(190,245,50,0.08), 0 16px 32px rgba(0,0,0,0.6)" }}
       >
         <div className="flex items-center gap-1.5 mb-2">
           <Shield size={10} className="text-[#BEF532]" />
@@ -108,7 +111,7 @@ function DashboardMockup() {
       {/* Floating status badge */}
       <div
         className="absolute -top-3 -right-3 bg-[#BEF532] rounded-xl px-3 py-2 shadow-xl hero-float"
-        style={{ animationDelay: "0.7s" }}
+        style={{ animationDelay: "0.7s", boxShadow: "0 0 24px rgba(190,245,50,0.35)" }}
       >
         <p className="text-[#0a1200] text-[10px] font-bold font-mono">4 envelopes</p>
         <p className="text-[#0a1200]/70 text-[9px]">actively locked</p>
@@ -117,6 +120,7 @@ function DashboardMockup() {
   );
 }
 
+// ── Hero ──────────────────────────────────────────────────────
 export default function Hero() {
   function handleScroll(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
     if (href.startsWith("#")) {
@@ -128,20 +132,20 @@ export default function Hero() {
 
   return (
     <section
-      className="relative min-h-screen flex items-center pt-16 overflow-hidden bg-[#0a0a0a]"
+      className="relative min-h-screen flex items-center pt-16 overflow-hidden"
       aria-labelledby="hero-headline"
+      style={{ backgroundColor: "#000000" }}
     >
-      {/* Background grid */}
-      <div className="absolute inset-0 hero-grid opacity-[0.035] pointer-events-none" />
-      {/* Ambient radial glow */}
-      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[#BEF532]/4 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-[#BEF532]/3 blur-[100px] pointer-events-none" />
+      {/* ── Orbit background — fully behind content ── */}
+      <HeroOrbit />
 
+      {/* ── Content layer ── */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20 lg:py-0 min-h-[calc(100vh-4rem)] flex items-center">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center w-full">
 
           {/* ── Left: Copy ── */}
           <div className="flex flex-col gap-6 hero-enter">
+
             {/* Headline */}
             <h1
               id="hero-headline"
@@ -166,7 +170,8 @@ export default function Hero() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-2">
               <Link
                 href="/dashboard"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#BEF532] text-[#0a1200] text-[15px] font-bold hover:bg-[#ceff3f] active:scale-[0.97] transition-all duration-150 shadow-[0_0_32px_rgba(190,245,50,0.25)]"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#BEF532] text-[#0a1200] text-[15px] font-bold hover:bg-[#ceff3f] active:scale-[0.97] transition-all duration-150"
+                style={{ boxShadow: "0 0 32px rgba(190,245,50,0.30), 0 0 64px rgba(190,245,50,0.12)" }}
               >
                 Explore WiseHaven
                 <ArrowRight size={16} />
@@ -181,7 +186,7 @@ export default function Hero() {
             </div>
 
             {/* Trust caption */}
-            <p className="text-[#606060] text-[12px] font-mono flex items-center gap-2">
+            <p className="text-[#505050] text-[12px] font-mono flex items-center gap-2">
               <span className="w-4 h-px bg-[#303030]" />
               Built around intentional saving, not impulsive spending.
             </p>
@@ -202,7 +207,10 @@ export default function Hero() {
           </div>
 
           {/* ── Right: Dashboard mockup ── */}
-          <div className="relative flex items-center justify-center hero-enter" style={{ animationDelay: "0.2s" }}>
+          <div
+            className="relative flex items-center justify-center hero-enter"
+            style={{ animationDelay: "0.2s" }}
+          >
             <div className="relative w-full max-w-[420px] mx-auto">
               <DashboardMockup />
             </div>
@@ -212,7 +220,7 @@ export default function Hero() {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30 pointer-events-none">
         <span className="text-[#606060] text-[10px] font-mono uppercase tracking-widest">Scroll</span>
         <div className="w-px h-8 bg-gradient-to-b from-[#606060] to-transparent" />
       </div>
