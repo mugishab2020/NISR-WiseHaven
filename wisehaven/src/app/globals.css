@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Google Fonts ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ── Base resets ──────────────────────────────────────────── */
+@layer base {
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #131313;
+    color: #e5e2e1;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior: none;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Hide scrollbar but keep scrolling */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Selection color — lime on black */
+  ::selection {
+    background-color: #bef532;
+    color: #151f00;
+  }
+
+  /* Focus ring — lime */
+  :focus-visible {
+    outline: 2px solid #bef532;
+    outline-offset: 2px;
+  }
+}
+
+/* ── Utility classes ──────────────────────────────────────── */
+@layer utilities {
+  /* Tabular numeric figures for financial readouts */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "zero" 1;
+  }
+
+  /* Safe area padding for mobile */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  /* Lime glow for highlights */
+  .glow-lime {
+    box-shadow: 0 0 24px rgba(190, 245, 50, 0.08);
+  }
+  .glow-lime-focus:focus {
+    box-shadow: 0 0 0 1px #bef532;
+  }
+}
+
+/* ── Component layer ──────────────────────────────────────── */
+@layer components {
+  /* Primary lime button */
+  .btn-primary {
+    @apply px-4 py-2.5 rounded bg-primary-container text-on-primary font-semibold text-body-md hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2;
+  }
+
+  /* Secondary dark button */
+  .btn-secondary {
+    @apply px-4 py-2.5 rounded bg-surface-container text-on-surface font-medium text-body-md hover:bg-surface-container-high border border-surface-container-high transition-colors flex items-center justify-center gap-2;
+  }
+
+  /* Destructive / emergency button */
+  .btn-destructive {
+    @apply px-4 py-2.5 rounded bg-error-container/20 text-error font-semibold text-body-md hover:bg-error-container/30 border border-error/20 transition-all flex items-center justify-center gap-2;
+  }
+
+  /* Form input */
+  .input-base {
+    @apply w-full h-12 px-4 rounded bg-surface-container text-on-surface placeholder:text-outline font-body-md text-body-md border border-surface-container-high focus:outline-none focus:border-primary-fixed focus:ring-1 focus:ring-primary-fixed transition-all;
+  }
+
+  /* Label */
+  .input-label {
+    @apply font-label-sm text-label-sm text-outline uppercase tracking-wider;
+  }
+
+  /* Status badge base */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-label-sm text-label-sm font-medium;
+  }
+
+  /* Locked badge */
+  .badge-locked {
+    @apply badge bg-primary-container/10 text-primary-fixed border border-primary-fixed/20;
+  }
+
+  /* Unlocking soon badge */
+  .badge-unlocking {
+    @apply badge bg-primary-container text-on-primary font-bold animate-pulse;
+  }
+
+  /* Ready to pay badge */
+  .badge-ready {
+    @apply badge bg-primary-container text-on-primary font-bold;
+  }
+
+  /* Paid badge */
+  .badge-paid {
+    @apply badge bg-surface-container-high text-outline;
+  }
+
+  /* Card base */
+  .card {
+    @apply rounded-xl bg-surface-container-low border border-surface-container p-space-md;
+  }
+
+  /* Section heading */
+  .section-label {
+    @apply font-label-sm text-label-sm text-outline uppercase tracking-wider;
+  }
+}

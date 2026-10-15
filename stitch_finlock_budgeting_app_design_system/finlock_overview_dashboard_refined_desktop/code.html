@@ -1,0 +1,585 @@
+<!DOCTYPE html><html class="dark" lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-tint": "#a3d800", "inverse-primary": "#4c6700", "surface-container-low": "#1c1b1b", "on-secondary-fixed": "#1b1c1c", "on-primary-container": "#516d00", "surface-variant": "#353534", "error-container": "#93000a", "secondary-fixed": "#e5e2e1", "on-primary-fixed": "#151f00", "tertiary-container": "#e4e2e1", "secondary-container": "#474746", "secondary-fixed-dim": "#c8c6c5", "background": "#131313", "on-tertiary-fixed-variant": "#474747", "error": "#ffb4ab", "surface": "#131313", "on-error": "#690005", "inverse-surface": "#e5e2e1", "on-tertiary": "#303030", "tertiary": "#ffffff", "surface-container-highest": "#353534", "on-background": "#e5e2e1", "primary-container": "#bef532", "surface-bright": "#3a3939", "on-tertiary-fixed": "#1b1c1c", "on-primary-fixed-variant": "#394d00", "on-secondary": "#303030", "primary": "#ffffff", "on-secondary-fixed-variant": "#474746", "outline-variant": "#434934", "primary-fixed": "#bef532", "tertiary-fixed": "#e4e2e1", "primary-fixed-dim": "#a3d800", "inverse-on-surface": "#313030", "tertiary-fixed-dim": "#c8c6c6", "on-secondary-container": "#b7b5b4", "surface-dim": "#131313", "on-surface": "#e5e2e1", "outline": "#8d937b", "surface-container-high": "#2a2a2a", "on-tertiary-container": "#656464", "on-surface-variant": "#c3c9ae", "surface-container": "#201f1f", "surface-container-lowest": "#0e0e0e", "on-error-container": "#ffdad6", "on-primary": "#263500", "secondary": "#c8c6c5" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-xs": "0.25rem", "space-xl": "2.5rem", "gutter": "1.5rem", "space-lg": "1.5rem", "margin": "2rem", "gutter-mobile": "1rem", "space-md": "1rem", "margin-mobile": "1rem", "space-sm": "0.5rem" }, "fontFamily": { "body-sm": [ "Inter" ], "headline-md": [ "Geist" ], "headline-lg": [ "Geist" ], "label-sm": [ "JetBrains Mono" ], "headline-sm": [ "Geist" ], "headline-xl": [ "Geist" ], "headline-lg-mobile": [ "Geist" ], "label-lg": [ "JetBrains Mono" ], "body-md": [ "Inter" ], "body-lg": [ "Inter" ], "label-md": [ "JetBrains Mono" ], "headline-xl-mobile": [ "Geist" ] }, "fontSize": { "body-sm": [ "12px", { "lineHeight": "16px", "fontWeight": "400" } ], "headline-md": [ "22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "500" } ], "headline-lg": [ "30px", { "lineHeight": "38px", "letterSpacing": "-0.015em", "fontWeight": "600" } ], "label-sm": [ "10px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "500" } ], "headline-sm": [ "18px", { "lineHeight": "24px", "fontWeight": "500" } ], "headline-xl": [ "40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" } ], "headline-lg-mobile": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" } ], "label-lg": [ "14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500" } ], "body-md": [ "14px", { "lineHeight": "20px", "fontWeight": "400" } ], "body-lg": [ "16px", { "lineHeight": "24px", "fontWeight": "400" } ], "label-md": [ "12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500" } ], "headline-xl-mobile": [ "32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" } ] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest z-50 flex flex-col justify-between py-space-md"><div class="flex flex-col gap-space-md"><div class="px-space-md flex flex-col gap-space-xs"><div class="flex items-center gap-space-sm"><img alt="WiseHaven Wordmark &amp; Emblem" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WMHQn07kXtFWiBw4yJEGl6ddFJM1hiqrvIiEAazd8PT6K6X1nvKraEEwGkkl3TlMdJqlVreWhiYGt-zzQL8S1IhHPraMfTp5f-1vBpffNHgVpkIHQxCDxZgQFHM8fnGppGE926kHs2Yv5C39LPTXMWm7MUfpqNdDpYrNaFrWkonKerCv_FJAxGAzjx8yCu-5qUYMhW2t5pVKGc5vhIngy83Gwq6mRwQRg6cMgGJ1S_paO2O2AznnUfjkKB"><span class="font-headline-sm text-headline-sm font-semibold tracking-tight text-primary">WiseHaven</span></div><p class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Give Every Franc a Purpose</p></div><nav class="flex flex-col gap-1 px-space-sm" data-active-classes="bg-surface-container-high text-primary-fixed border-l-2 border-primary-fixed font-medium"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="overview" href="#"><span class="material-symbols-outlined text-lg">dashboard</span><span class="font-body-md text-body-md">Overview</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="envelopes" href="#"><span class="material-symbols-outlined text-lg">lock_clock</span><span class="font-body-md text-body-md">Envelopes</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="emergency-vault" href="#"><span class="material-symbols-outlined text-lg">shield</span><span class="font-body-md text-body-md">Emergency Vault</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="activity" href="#"><span class="material-symbols-outlined text-lg">receipt_long</span><span class="font-body-md text-body-md">Activity</span></a><a class="flex items-center justify-between px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="notifications" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-lg">notifications</span><span class="font-body-md text-body-md">Notifications</span></div><span class="px-1.5 py-0.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold">2</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="settings" href="#"><span class="material-symbols-outlined text-lg">settings</span><span class="font-body-md text-body-md">Settings</span></a></nav></div><div class="flex flex-col gap-space-md px-space-sm"><div class="p-space-sm rounded bg-surface-container-low flex flex-col gap-space-xs"><div class="flex items-center justify-between"><span class="font-label-sm text-label-sm text-outline uppercase">Kigali Clock</span><span class="font-label-sm text-label-sm text-on-surface-variant font-mono">CAT (UTC+2)</span></div><div class="flex items-center justify-between"><span class="font-label-sm text-label-sm text-outline uppercase">Network</span><div class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary-fixed"></span><span class="font-label-sm text-label-sm text-primary-fixed">Protected</span></div></div><div class="flex items-center justify-between"><span class="font-label-sm text-label-sm text-outline uppercase">Active Locks</span><span class="font-label-sm text-label-sm text-on-surface font-semibold">4 Envelopes</span></div></div><div class="pt-space-sm flex items-center justify-between px-space-xs"><div class="flex items-center gap-space-sm"><img alt="WiseHaven Wordmark &amp; Emblem" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmIVOyCoh8h8nBVtK_QYE-wd3IYrEy3cPdJzLGpj9nEQ23EiE6Ip3wHhM3q5qjllPF1Aetc3HkdwVi7nKSHzHPq0JHer2XxH-9blPOYeek0MeFMx_SSGX0cYA_HhEC5OCXFZVjazKIyfIe3wGFyX7_nSJDjEwcum2DcAZVKni1PyuP0zOpdbn17BSLcL4gqTUp6YcRsfxRx67Vox_AtaZ2QhisprCeyl3YoiyUMBlEPt_3kAn-fyHalg"><div class="flex flex-col"><span class="font-body-sm text-body-sm text-on-surface font-medium leading-none">Godson N.</span><span class="font-label-sm text-label-sm text-outline mt-1">+250 78 812 3456</span></div></div><a class="text-outline hover:text-on-surface p-1 rounded hover:bg-surface-container-high transition-colors" data-path="login" href="#" title="Sign out"><span class="material-symbols-outlined text-base">logout</span></a></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface/85 backdrop-blur-xl z-40 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-md w-96"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">search</span><input class="w-full h-10 pl-9 pr-3 rounded bg-surface-container-low text-on-surface placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:ring-1 focus:ring-primary-fixed transition-all" placeholder="Search envelopes, transactions, recipients..." type="text"></div><span class="hidden xl:inline-flex items-center px-2 py-1 rounded bg-surface-container font-label-sm text-label-sm text-outline whitespace-nowrap">Africa/Kigali</span></div><div class="flex items-center gap-space-md"><button class="flex items-center gap-1.5 px-2 py-1 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors" title="Toggle Balance Visibility" type="button"><span class="material-symbols-outlined text-base">visibility_off</span><span class="font-label-sm text-label-sm hidden md:inline">Privacy Mode</span></button><button class="relative p-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" type="button"><span class="material-symbols-outlined text-xl">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary-fixed"></span></button><div class="flex items-center gap-space-sm"><button class="px-space-md py-2 rounded bg-surface-container text-on-surface font-body-md text-body-md hover:bg-surface-container-high transition-colors" type="button">+ Add Money</button><button class="px-space-md py-2 rounded bg-primary-container text-on-primary font-body-md text-body-md font-semibold hover:opacity-90 transition-opacity" type="button">Allocate Income</button></div></div></header><main class="relative pt-16 bg-surface w-full px-gutter min-h-screen"><div class="flex flex-col w-full pb-space-xl">
+<!-- Top Bar & Header Context -->
+<section class="flex flex-col md:flex-row md:items-end justify-between gap-space-md pt-space-md pb-space-lg">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="font-headline-sm text-headline-sm font-semibold text-primary tracking-tight">Overview</span>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-container-high text-primary-fixed font-label-sm text-label-sm border border-outline-variant/40">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed animate-pulse"></span>
+          KIGALI SYNCED (CAT UTC+2)
+        </span>
+<span class="font-label-sm text-label-sm text-outline px-2 py-0.5 rounded bg-surface-container-low font-mono">OCT-2026-CYCLE</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg font-semibold text-primary tracking-tight">Good evening, Godson</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+        Here is your capital commitment and liquidity structure. All ledger entries reconciled with MTN MoMo &amp; BNR banking gateways.
+      </p>
+</div>
+<!-- Header Secondary Controls & Action CTAs -->
+<div class="flex items-center gap-space-sm flex-wrap">
+<div class="flex items-center rounded bg-surface-container-low p-1 border border-surface-container-high">
+<button class="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-outline hover:text-on-surface hover:bg-surface-container transition-colors text-label-sm font-label-sm" id="privacy-toggle" type="button">
+<span class="material-symbols-outlined text-base" id="privacy-icon">visibility</span>
+<span class="hidden sm:inline" id="privacy-text">Hide Figures</span>
+</button>
+<span class="w-px h-4 bg-surface-container-high mx-1"></span>
+<div class="relative">
+<select class="appearance-none bg-transparent pr-7 pl-2 py-1 text-on-surface font-label-sm text-label-sm focus:outline-none cursor-pointer">
+<option value="oct-2026">October 2026</option>
+<option value="sep-2026">September 2026</option>
+<option value="aug-2026">August 2026</option>
+</select>
+<span class="material-symbols-outlined absolute right-1 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-sm">expand_more</span>
+</div>
+</div>
+<button class="flex items-center gap-1.5 px-space-md py-2 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-body-md text-body-md transition-colors border border-surface-container-high" type="button">
+<span class="material-symbols-outlined text-base">add</span>
+<span class="">Add Money</span>
+</button>
+<button class="flex items-center gap-1.5 px-space-md py-2 rounded bg-primary-container hover:opacity-90 text-on-primary font-body-md text-body-md font-semibold transition-opacity shadow-sm shadow-primary-container/20" type="button">
+<span class="material-symbols-outlined text-base">lock_clock</span>
+<span class="">Allocate Income</span>
+</button>
+</div>
+</section>
+<!-- Master Financial Architecture Card -->
+<section class="rounded-xl bg-surface-container-lowest p-space-md md:p-space-lg flex flex-col gap-space-md relative overflow-hidden border border-surface-container-high">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-sm pb-space-sm border-b border-surface-container">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Total Reconciled Funds</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-container/10 text-primary-fixed text-label-sm font-label-sm border border-primary-fixed/20 font-mono">
+<span class="material-symbols-outlined text-xs">verified</span> 100% IN BUDGET
+        </span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-xl text-headline-xl font-bold tracking-tight text-primary privacy-mask" data-original="250,000">250,000</span>
+<span class="font-label-md text-label-md text-on-surface-variant font-mono">RWF</span>
+</div>
+</div>
+<!-- Tri-Partition Balance Architecture -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md pt-space-xs">
+<!-- 1. Available to Allocate -->
+<div class="flex flex-col justify-between p-space-md rounded-lg bg-surface-container-low border border-surface-container relative group hover:border-surface-variant transition-colors">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase text-outline tracking-wider flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-on-surface-variant"></span>
+              Available to Allocate
+            </span>
+<span class="font-label-sm text-label-sm text-outline font-mono">26.0%</span>
+</div>
+<div class="flex items-baseline gap-1.5 mt-2">
+<span class="font-headline-lg text-headline-lg font-bold text-primary privacy-mask" data-original="65,000">65,000</span>
+<span class="font-label-sm text-label-sm text-outline font-mono">RWF</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-snug">
+            Spendable, uncommitted liquidity. Vulnerable to everyday leakage.
+          </p>
+</div>
+<div class="mt-space-md pt-space-sm border-t border-surface-container flex items-center justify-between">
+<a class="inline-flex items-center gap-1 text-primary-fixed hover:underline font-label-sm text-label-sm font-semibold" href="#">
+<span class="">Lock Funds Now</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+<span class="font-label-sm text-label-sm text-outline font-mono">STAGING WALLET</span>
+</div>
+</div>
+<!-- 2. Locked in Envelopes -->
+<div class="flex flex-col justify-between p-space-md rounded-lg bg-surface-container-low border border-primary-fixed/20 relative group hover:border-primary-fixed/40 transition-colors shadow-sm">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase text-primary-fixed tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-primary-fixed">lock</span>
+              Locked in Envelopes
+            </span>
+<span class="font-label-sm text-label-sm text-primary-fixed font-mono font-semibold">64.0%</span>
+</div>
+<div class="flex items-baseline gap-1.5 mt-2">
+<span class="font-headline-lg text-headline-lg font-bold text-primary privacy-mask" data-original="160,000">160,000</span>
+<span class="font-label-sm text-label-sm text-outline font-mono">RWF</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-snug">
+            Non-negotiable lock schedule active across 4 envelopes. Zero premature leak.
+          </p>
+</div>
+<div class="mt-space-md pt-space-sm border-t border-surface-container flex items-center justify-between">
+<div class="flex items-center gap-1 text-on-surface font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed"></span>
+<span class="">4 Active Locks</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline font-mono">SECURED</span>
+</div>
+</div>
+<!-- 3. Emergency Vault -->
+<div class="flex flex-col justify-between p-space-md rounded-lg bg-surface-container-low border border-surface-container relative group hover:border-surface-variant transition-colors">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase text-secondary tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-secondary">shield</span>
+              Emergency Vault
+            </span>
+<span class="font-label-sm text-label-sm text-outline font-mono">10.0%</span>
+</div>
+<div class="flex items-baseline gap-1.5 mt-2">
+<span class="font-headline-lg text-headline-lg font-bold text-primary privacy-mask" data-original="25,000">25,000</span>
+<span class="font-label-sm text-label-sm text-outline font-mono">RWF</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-snug">
+            Air-gapped capital shield. Dual-approval required for disbursement.
+          </p>
+</div>
+<div class="mt-space-md pt-space-sm border-t border-surface-container flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline">Pace: 25% of Target</span>
+<span class="font-label-sm text-label-sm text-primary-fixed font-mono">+10% Auto-Sweep</span>
+</div>
+</div>
+</div>
+<!-- Visual Linear Ratio Track -->
+<div class="flex flex-col gap-2 pt-space-xs">
+<div class="h-2 w-full rounded-full bg-surface-container overflow-hidden flex">
+<div class="h-full bg-primary-fixed transition-all duration-500" style="width: 64%" title="Locked: 160,000 RWF (64%)"></div>
+<div class="h-full bg-secondary-container transition-all duration-500" style="width: 26%" title="Available: 65,000 RWF (26%)"></div>
+<div class="h-full bg-primary-fixed/40 transition-all duration-500" style="width: 10%" title="Vault: 25,000 RWF (10%)"></div>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm text-outline flex-wrap gap-2">
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-primary-fixed"></span> Locked (64%)</span>
+<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-secondary-container"></span> Unallocated (26%)</span>
+<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-primary-fixed/40"></span> Vault (10%)</span>
+</div>
+<span class="font-mono">BNR REGULATION T-1 CLEARANCE</span>
+</div>
+</div>
+</section>
+<!-- Main Content 12-Column Grid -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg mt-space-lg">
+<!-- Left Column: Active Envelopes (8 cols) -->
+<div class="lg:col-span-8 flex flex-col gap-space-md">
+<!-- Section Bar with filters -->
+<div class="flex items-center justify-between flex-wrap gap-space-sm pb-1">
+<div class="flex items-center gap-space-sm">
+<h2 class="font-headline-sm text-headline-sm font-semibold text-primary">Active Envelopes</h2>
+<div class="flex items-center gap-1 bg-surface-container-low p-1 rounded border border-surface-container">
+<button class="px-2 py-0.5 rounded bg-surface-container text-primary font-label-sm text-label-sm font-medium">All 4</button>
+<button class="px-2 py-0.5 rounded text-outline hover:text-on-surface font-label-sm text-label-sm">Locked 3</button>
+<button class="px-2 py-0.5 rounded text-primary-fixed hover:text-primary-fixed-dim font-label-sm text-label-sm flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed"></span> Unlocking 1
+            </button>
+</div>
+</div>
+<a class="font-label-sm text-label-sm text-primary-fixed hover:underline flex items-center gap-1" href="#">
+<span class="">View All Envelopes</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<!-- 2x2 Grid of Envelope Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Envelope 1: Rent -->
+<div class="rounded-xl bg-surface-container-low p-space-md flex flex-col justify-between border border-surface-container hover:border-surface-variant transition-all hover:bg-surface-container/30 group">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="p-2 rounded bg-surface-container text-primary-fixed material-symbols-outlined text-lg">apartment</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm font-semibold text-primary group-hover:text-primary-fixed transition-colors">Rent &amp; Service Charge</h3>
+<span class="font-label-sm text-label-sm text-outline">KIGALI HEIGHTS #4B</span>
+</div>
+</div>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-container/10 text-primary-fixed text-label-sm font-label-sm border border-primary-fixed/20 font-mono">
+<span class="material-symbols-outlined text-xs">lock</span> 9 DAYS
+              </span>
+</div>
+<div class="pt-2">
+<span class="font-label-sm text-label-sm uppercase text-outline">Locked Balance</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-md text-headline-md font-bold text-primary font-mono privacy-mask" data-original="100,000">100,000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">RWF</span>
+</div>
+</div>
+<!-- Segmented Progress Track -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between font-label-sm text-label-sm text-outline font-mono">
+<span class="">Release: 25 Oct 2026</span>
+<span class="text-on-surface">65% Elapsed</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden flex">
+<div class="bg-primary-fixed h-full rounded-full" style="width: 65%"></div>
+</div>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm border-t border-surface-container flex flex-col gap-1.5 text-body-sm text-on-surface-variant">
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-outline">Beneficiary:</span>
+<span class="text-on-surface font-mono">Landlord MTN MoMo</span>
+</div>
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-outline">Lock Policy:</span>
+<span class="text-secondary font-mono">Non-negotiable</span>
+</div>
+</div>
+</div>
+<!-- Envelope 2: Food & Groceries -->
+<div class="rounded-xl bg-surface-container-low p-space-md flex flex-col justify-between border border-surface-container hover:border-surface-variant transition-all hover:bg-surface-container/30 group">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="p-2 rounded bg-surface-container text-on-surface material-symbols-outlined text-lg">shopping_basket</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm font-semibold text-primary group-hover:text-primary-fixed transition-colors">Food &amp; Groceries</h3>
+<span class="font-label-sm text-label-sm text-outline">BI-WEEKLY REPLENISHMENT</span>
+</div>
+</div>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-container/10 text-primary-fixed text-label-sm font-label-sm border border-primary-fixed/20 font-mono">
+<span class="material-symbols-outlined text-xs">timelapse</span> 2 DAYS
+              </span>
+</div>
+<div class="pt-2">
+<span class="font-label-sm text-label-sm uppercase text-outline">Locked Balance</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-md text-headline-md font-bold text-primary font-mono privacy-mask" data-original="20,000">20,000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">RWF</span>
+</div>
+</div>
+<!-- Segmented Progress Track -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between font-label-sm text-label-sm text-outline font-mono">
+<span class="">Release: 18 Oct 2026</span>
+<span class="text-on-surface">86% Elapsed</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden flex">
+<div class="bg-primary-fixed h-full rounded-full" style="width: 86%"></div>
+</div>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm border-t border-surface-container flex flex-col gap-1.5 text-body-sm text-on-surface-variant">
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-outline">Disbursement:</span>
+<span class="text-on-surface font-mono">Personal MoMo (+250 78...)</span>
+</div>
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-outline">Lock Policy:</span>
+<span class="text-secondary font-mono">Auto-disburse</span>
+</div>
+</div>
+</div>
+<!-- Envelope 3: Utilities (Unlocking Soon Highlight) -->
+<div class="rounded-xl bg-surface-container-low p-space-md flex flex-col justify-between border-2 border-primary-fixed/40 relative shadow-lg shadow-primary-container/5 hover:border-primary-fixed transition-all group">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="p-2 rounded bg-primary-container text-on-primary material-symbols-outlined text-lg">bolt</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm font-semibold text-primary">REG Cashpower &amp; WASAC</h3>
+<span class="font-label-sm text-label-sm text-outline">METER #0421-9982-11</span>
+</div>
+</div>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-bold font-mono animate-pulse">
+                UNLOCKING SOON
+              </span>
+</div>
+<div class="pt-2">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase text-primary-fixed font-semibold">Ready for Execution</span>
+<span class="font-label-sm text-label-sm text-primary-fixed font-mono">18h REMAINING</span>
+</div>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-md text-headline-md font-bold text-primary font-mono privacy-mask" data-original="15,000">15,000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">RWF</span>
+</div>
+</div>
+<!-- Segmented Progress Track -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant font-mono">
+<span class="">Matures: Tomorrow, 08:00 AM</span>
+<span class="text-primary-fixed font-semibold">96% Elapsed</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden flex">
+<div class="bg-primary-fixed h-full rounded-full" style="width: 96%"></div>
+</div>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm border-t border-surface-container flex flex-col gap-2">
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-outline">Direct Pay Link:</span>
+<span class="text-on-surface font-mono">REG Pre-Paid API</span>
+</div>
+<button class="w-full py-1.5 rounded bg-surface-container hover:bg-surface-container-high text-primary-fixed hover:text-primary font-label-sm text-label-sm font-semibold transition-colors flex items-center justify-center gap-1 border border-primary-fixed/20" type="button">
+<span class="">Prepare Payment Details</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Envelope 4: Tuition -->
+<div class="rounded-xl bg-surface-container-low p-space-md flex flex-col justify-between border border-surface-container hover:border-surface-variant transition-all hover:bg-surface-container/30 group">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="p-2 rounded bg-surface-container text-on-surface material-symbols-outlined text-lg">school</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm font-semibold text-primary group-hover:text-primary-fixed transition-colors">Semester Tuition</h3>
+<span class="font-label-sm text-label-sm text-outline">UR COLLEGE OF SCIENCE</span>
+</div>
+</div>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-container/10 text-primary-fixed text-label-sm font-label-sm border border-primary-fixed/20 font-mono">
+<span class="material-symbols-outlined text-xs">lock</span> 14 DAYS
+              </span>
+</div>
+<div class="pt-2">
+<span class="font-label-sm text-label-sm uppercase text-outline">Locked Balance</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-md text-headline-md font-bold text-primary font-mono privacy-mask" data-original="25,000">25,000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">RWF</span>
+</div>
+</div>
+<!-- Segmented Progress Track -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between font-label-sm text-label-sm text-outline font-mono">
+<span class="">Release: 30 Oct 2026</span>
+<span class="text-on-surface">40% Elapsed</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden flex">
+<div class="bg-primary-fixed h-full rounded-full" style="width: 40%"></div>
+</div>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm border-t border-surface-container flex flex-col gap-1.5 text-body-sm text-on-surface-variant">
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-outline">Purpose:</span>
+<span class="text-on-surface font-mono">Exam Clearance Card</span>
+</div>
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-outline">Lock Policy:</span>
+<span class="text-secondary font-mono">Strict Exam Lock</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Add Prompt Banner -->
+<div class="rounded-xl bg-surface-container-lowest p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm border border-dashed border-surface-container-high">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary-fixed text-2xl">new_label</span>
+<div>
+<h4 class="font-headline-sm text-headline-sm font-medium text-primary">Need a new locked envelope?</h4>
+<p class="font-body-sm text-body-sm text-outline">Create a dedicated envelope for health insurance (Mutuelle de Santé), motorcycle maintenance, or family remittances.</p>
+</div>
+</div>
+<button class="whitespace-nowrap px-space-md py-2 rounded bg-surface-container hover:bg-surface-container-high text-on-surface text-body-md font-body-md transition-colors border border-surface-container-high" type="button">
+          + Create Envelope
+        </button>
+</div>
+</div>
+<!-- Right Column: Institutional Rail (4 cols) -->
+<div class="lg:col-span-4 flex flex-col gap-space-md">
+<!-- 1. Coming Up Maturity Schedule -->
+<div class="rounded-xl bg-surface-container-low p-space-md border border-surface-container flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-lg">calendar_month</span>
+<h3 class="font-headline-sm text-headline-sm font-semibold text-primary">Maturity Timeline</h3>
+</div>
+<span class="font-label-sm text-label-sm text-outline font-mono">Q4-2026</span>
+</div>
+<!-- Vertical Milestone Timeline -->
+<div class="relative pl-6 flex flex-col gap-space-md before:content-[''] before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-px before:bg-surface-container-high">
+<!-- Step 1 -->
+<div class="relative flex flex-col gap-0.5">
+<span class="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-primary-fixed ring-4 ring-surface-container-low"></span>
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold text-primary-fixed font-mono">16 OCT • 08:00 CAT</span>
+<span class="font-label-sm text-label-sm text-primary font-mono privacy-mask" data-original="15,000">15,000 RWF</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">REG Cashpower &amp; WASAC</span>
+<span class="font-label-sm text-label-sm text-outline">Utility meter unlock trigger</span>
+</div>
+<!-- Step 2 -->
+<div class="relative flex flex-col gap-0.5">
+<span class="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-on-surface-variant ring-4 ring-surface-container-low"></span>
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">18 OCT • 12:00 CAT</span>
+<span class="font-label-sm text-label-sm text-primary font-mono privacy-mask" data-original="20,000">20,000 RWF</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">Food &amp; Groceries</span>
+<span class="font-label-sm text-label-sm text-outline">MoMo disburse scheduled</span>
+</div>
+<!-- Step 3 -->
+<div class="relative flex flex-col gap-0.5">
+<span class="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-surface-container-highest ring-4 ring-surface-container-low"></span>
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline font-mono">25 OCT • 09:00 CAT</span>
+<span class="font-label-sm text-label-sm text-primary font-mono privacy-mask" data-original="100,000">100,000 RWF</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">Rent &amp; Service Charge</span>
+<span class="font-label-sm text-label-sm text-outline">Kigali Heights landlord push</span>
+</div>
+<!-- Step 4 -->
+<div class="relative flex flex-col gap-0.5">
+<span class="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-surface-container-highest ring-4 ring-surface-container-low"></span>
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline font-mono">30 OCT • 17:00 CAT</span>
+<span class="font-label-sm text-label-sm text-primary font-mono privacy-mask" data-original="25,000">25,000 RWF</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">Semester Tuition</span>
+<span class="font-label-sm text-label-sm text-outline">University of Rwanda portal</span>
+</div>
+</div>
+</div>
+<!-- 2. Emergency Vault Status Widget -->
+<div class="rounded-xl bg-surface-container-low p-space-md border border-surface-container flex flex-col gap-space-sm relative overflow-hidden">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="p-1.5 rounded bg-surface-container text-primary-fixed material-symbols-outlined text-base">shield_lock</span>
+<h3 class="font-headline-sm text-headline-sm font-semibold text-primary">Emergency Vault</h3>
+</div>
+<a class="font-label-sm text-label-sm text-primary-fixed hover:underline flex items-center gap-0.5" href="#">
+<span class="">Open Vault</span>
+<span class="material-symbols-outlined text-xs">arrow_forward</span>
+</a>
+</div>
+<!-- Radial Metric & Statistics -->
+<div class="flex items-center gap-space-md pt-2">
+<!-- Radial Progress Circle (SVG) -->
+<div class="relative w-24 h-24 shrink-0 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+<!-- Background circle -->
+<path class="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+<!-- Progress fill (25%) -->
+<path class="text-primary-fixed transition-all duration-700 ease-out" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="25, 100" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-label-lg text-label-lg font-bold text-primary font-mono leading-none">25%</span>
+<span class="font-label-sm text-label-sm text-outline mt-0.5">FUNDED</span>
+</div>
+</div>
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-sm text-headline-sm font-bold text-primary font-mono privacy-mask" data-original="25,000">25,000</span>
+<span class="font-label-sm text-label-sm text-outline font-mono">/ 100,000 RWF</span>
+</div>
+<p class="font-body-sm text-body-sm text-outline leading-tight">
+              Baseline target: 3-month living cushion (100k RWF).
+            </p>
+<span class="inline-flex items-center gap-1 mt-1 text-primary-fixed font-label-sm text-label-sm font-mono">
+<span class="material-symbols-outlined text-xs">auto_mode</span>
+              10% auto-sweep active
+            </span>
+</div>
+</div>
+<div class="mt-2 p-2 rounded bg-surface-container-lowest text-label-sm font-label-sm text-outline flex items-center justify-between border border-surface-container">
+<span class="">Early withdrawal penalty:</span>
+<span class="text-error font-mono font-medium">5.0% Disincentive</span>
+</div>
+</div>
+<!-- 3. Recent Activity Log -->
+<div class="rounded-xl bg-surface-container-low p-space-md border border-surface-container flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-lg">history</span>
+<h3 class="font-headline-sm text-headline-sm font-semibold text-primary">Recent Activity</h3>
+</div>
+<span class="font-label-sm text-label-sm text-outline font-mono">LEDGER</span>
+</div>
+<div class="flex flex-col divide-y divide-surface-container">
+<!-- Row 1: Salary Deposit -->
+<div class="py-2.5 flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-2.5 min-w-0">
+<span class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-primary-fixed material-symbols-outlined text-sm shrink-0">arrow_downward</span>
+<div class="flex flex-col min-w-0">
+<span class="font-body-sm text-body-sm text-on-surface font-medium truncate">MoMo Salary Inflow</span>
+<span class="font-label-sm text-label-sm text-outline font-mono">Today, 09:14 CAT</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm font-bold text-primary-fixed font-mono shrink-0 privacy-mask" data-original="+250,000">+250,000 RWF</span>
+</div>
+<!-- Row 2: First-sweep -->
+<div class="py-2.5 flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-2.5 min-w-0">
+<span class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-secondary material-symbols-outlined text-sm shrink-0">shield</span>
+<div class="flex flex-col min-w-0">
+<span class="font-body-sm text-body-sm text-on-surface font-medium truncate">Vault 10% Auto-Sweep</span>
+<span class="font-label-sm text-label-sm text-outline font-mono">Today, 09:15 CAT</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm font-bold text-outline font-mono shrink-0 privacy-mask" data-original="-25,000">-25,000 RWF</span>
+</div>
+<!-- Row 3: Rent lock -->
+<div class="py-2.5 flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-2.5 min-w-0">
+<span class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-outline material-symbols-outlined text-sm shrink-0">lock</span>
+<div class="flex flex-col min-w-0">
+<span class="font-body-sm text-body-sm text-on-surface font-medium truncate">Locked: Rent Oct 2026</span>
+<span class="font-label-sm text-label-sm text-outline font-mono">Today, 09:16 CAT</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm font-bold text-outline font-mono shrink-0 privacy-mask" data-original="-100,000">-100,000 RWF</span>
+</div>
+<!-- Row 4: Utilities lock -->
+<div class="py-2.5 flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-2.5 min-w-0">
+<span class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-outline material-symbols-outlined text-sm shrink-0">lock</span>
+<div class="flex flex-col min-w-0">
+<span class="font-body-sm text-body-sm text-on-surface font-medium truncate">Locked: REG Electricity</span>
+<span class="font-label-sm text-label-sm text-outline font-mono">Today, 09:16 CAT</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm font-bold text-outline font-mono shrink-0 privacy-mask" data-original="-15,000">-15,000 RWF</span>
+</div>
+</div>
+<a class="pt-1 text-center font-label-sm text-label-sm text-outline hover:text-on-surface font-mono transition-colors" href="#">
+          View full ledger audit trail (18 records) →
+        </a>
+</div>
+</div>
+</section>
+<!-- Institutional Trust & Regulatory Assurance Footer Bar -->
+<footer class="mt-space-lg p-space-md rounded-lg bg-surface-container-lowest border border-surface-container flex flex-col md:flex-row items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-outline text-xl">account_balance</span>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm font-medium text-on-surface">National Bank of Rwanda (BNR) Regulatory Standard</span>
+<span class="font-label-sm text-label-sm text-outline">Time-locked smart envelopes enforce strict commitment with zero impulse leakage. Micro-hedged via local payment aggregators.</span>
+</div>
+</div>
+<div class="flex items-center gap-space-md shrink-0">
+<div class="flex items-center gap-1.5 text-label-sm font-label-sm text-outline font-mono">
+<span class="w-2 h-2 rounded-full bg-primary-fixed"></span>
+<span class="">SHA-256 RECONCILED</span>
+</div>
+<span class="text-outline">/</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">V3.12.0</span>
+</div>
+</footer>
+<!-- Client-Side Micro-Interaction for Privacy Toggle -->
+<script>
+    (function initPrivacyToggle() {
+      const toggleBtn = document.getElementById('privacy-toggle');
+      const icon = document.getElementById('privacy-icon');
+      const text = document.getElementById('privacy-text');
+      const figures = document.querySelectorAll('.privacy-mask');
+      let isHidden = false;
+
+      if (!toggleBtn) return;
+
+      toggleBtn.addEventListener('click', () => {
+        isHidden = !isHidden;
+        figures.forEach(el => {
+          if (isHidden) {
+            el.dataset.revealed = el.textContent;
+            el.textContent = '••••••';
+          } else {
+            el.textContent = el.dataset.revealed || el.dataset.original;
+          }
+        });
+        if (icon) {
+          icon.textContent = isHidden ? 'visibility_off' : 'visibility';
+        }
+        if (text) {
+          text.textContent = isHidden ? 'Show Figures' : 'Hide Figures';
+        }
+      });
+    })();
+  </script>
+</div></main></div>
+
+</body></html>
