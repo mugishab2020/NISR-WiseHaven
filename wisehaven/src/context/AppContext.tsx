@@ -14,6 +14,7 @@ import React, {
   useCallback,
   type ReactNode,
 } from "react";
+import Image from "next/image";
 import type { DemoAccount, Envelope } from "@/types";
 import {
   loadAccount,
@@ -149,16 +150,53 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   }, [mutate]);
 
-  // Show a loading skeleton until hydrated to avoid SSR mismatch
+  // Show an animated splash screen until hydrated to avoid SSR mismatch
   if (isLoading || !account) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-primary-fixed border-t-transparent rounded-full animate-spin" />
-          <span className="font-label-sm text-label-sm text-outline uppercase tracking-widest">
-            Loading WiseHaven…
-          </span>
+      <div className="min-h-screen bg-[#0e0e0e] flex flex-col items-center justify-center gap-8 px-6">
+
+        {/* ── Logo with pulse ring ── */}
+        <div className="relative flex items-center justify-center">
+          {/* Outer pulse ring */}
+          <span className="absolute w-32 h-32 rounded-full border border-[#BEF532]/20 animate-ping" />
+          {/* Mid ring */}
+          <span className="absolute w-24 h-24 rounded-full border border-[#BEF532]/10" />
+          {/* Logo container */}
+          <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(190,245,50,0.15)]">
+            <Image
+              src="/WiseHaven Logo.jpg"
+              alt="WiseHaven"
+              fill
+              sizes="80px"
+              className="object-cover"
+              priority
+            />
+          </div>
         </div>
+
+        {/* ── Brand name ── */}
+        <div className="flex flex-col items-center gap-1.5">
+          <h1 className="text-white font-bold text-2xl tracking-tight"
+              style={{ fontFamily: "Geist, Inter, sans-serif" }}>
+            WiseHaven
+          </h1>
+          <p className="text-[#8D937B] text-xs uppercase tracking-[0.2em]"
+             style={{ fontFamily: "Inter, sans-serif" }}>
+            Give Every Franc a Purpose
+          </p>
+        </div>
+
+        {/* ── Progress bar ── */}
+        <div className="w-48 h-0.5 rounded-full bg-[#201f1f] overflow-hidden">
+          <div className="h-full bg-[#BEF532] rounded-full origin-left animate-[loading-bar_1.4s_ease-in-out_infinite]" />
+        </div>
+
+        {/* ── Status label ── */}
+        <p className="text-[#8D937B] text-[11px] uppercase tracking-[0.18em]"
+           style={{ fontFamily: "Inter, sans-serif" }}>
+          Initialising secure wallet…
+        </p>
+
       </div>
     );
   }
