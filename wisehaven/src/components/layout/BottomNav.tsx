@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 const MOBILE_NAV = [
-  { label: "Overview", href: "/", icon: LayoutDashboard },
+  { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { label: "Envelopes", href: "/envelopes", icon: Lock },
   { label: "Vault", href: "/vault", icon: Shield },
   { label: "Activity", href: "/activity", icon: Receipt },
@@ -22,7 +22,7 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   function isActive(href: string) {
-    if (href === "/") return pathname === "/";
+    if (href === "/dashboard") return pathname === "/dashboard";
     return pathname.startsWith(href);
   }
 

@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AppProvider } from "@/context/AppContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -35,8 +34,8 @@ export default function RootLayout({
       <head>
         {/* Geist and JetBrains Mono via Google Fonts — loaded in globals.css */}
       </head>
-      <body className="bg-surface text-on-surface antialiased">
-        <AppProvider>{children}</AppProvider>
+      <body className="antialiased">
+        {children}
       </body>
     </html>
   );

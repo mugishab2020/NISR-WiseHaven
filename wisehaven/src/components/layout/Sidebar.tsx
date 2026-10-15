@@ -15,7 +15,7 @@ import {
 import { useApp } from "@/context/AppContext";
 
 const NAV_ITEMS = [
-  { label: "Overview", href: "/", icon: LayoutDashboard, path: "overview" },
+  { label: "Overview", href: "/dashboard", icon: LayoutDashboard, path: "overview" },
   {
     label: "Envelopes",
     href: "/envelopes",
@@ -54,7 +54,7 @@ export default function Sidebar() {
   const { account } = useApp();
 
   function isActive(href: string) {
-    if (href === "/") return pathname === "/";
+    if (href === "/dashboard") return pathname === "/dashboard";
     return pathname.startsWith(href);
   }
 
