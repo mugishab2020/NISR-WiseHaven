@@ -99,7 +99,7 @@ export default function Footer() {
             style={{
               color: "transparent",
               WebkitTextStroke: "1px #BEF532",
-              opacity: 0.18,
+              opacity: 0.45,
             }}
           >
             Wise
