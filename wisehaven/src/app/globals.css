@@ -121,6 +121,46 @@
   animation: orbit-emblem-pulse 6s ease-in-out infinite;
 }
 
+/* ── HeroVisual keyframes ─────────────────────────────────── */
+
+/* SVG orbital ring — outer */
+@keyframes hv-spin-cw {
+  from { transform: rotate(-20deg); }
+  to   { transform: rotate(340deg); }
+}
+/* SVG orbital ring — inner */
+@keyframes hv-spin-ccw {
+  from { transform: rotate(12deg); }
+  to   { transform: rotate(-348deg); }
+}
+/* Sculptural form — very slow float */
+@keyframes hv-form-float {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50%       { transform: translateY(-10px) scale(1.008); }
+}
+/* Envelope fragment bob */
+@keyframes hv-fragment-bob {
+  0%, 100% { transform: translateY(0px); }
+  45%       { transform: translateY(-8px); }
+}
+
+.hv-ring-outer {
+  transform-origin: 280px 280px;
+  transform-box: fill-box;
+  animation: hv-spin-cw 70s linear infinite;
+}
+.hv-ring-inner {
+  transform-origin: 280px 280px;
+  transform-box: fill-box;
+  animation: hv-spin-ccw 95s linear infinite;
+}
+.hv-orbit-form {
+  animation: hv-form-float 6s ease-in-out infinite;
+}
+.hv-fragment {
+  animation: hv-fragment-bob 8s ease-in-out infinite;
+}
+
 .hero-float {
   animation: hero-float 5s ease-in-out infinite;
 }
@@ -142,7 +182,11 @@
   .orbit-ring-2,
   .orbit-ring-3,
   .orbit-fragment,
-  .orbit-emblem {
+  .orbit-emblem,
+  .hv-ring-outer,
+  .hv-ring-inner,
+  .hv-orbit-form,
+  .hv-fragment {
     animation: none !important;
   }
 }
