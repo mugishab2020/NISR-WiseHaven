@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import NavBar from "@/components/home/NavBar";
-import Hero from "@/components/home/Hero";
+import HeroSection from "@/components/home/HeroSection";
 import BudgetSimulator from "@/components/home/BudgetSimulator";
 import EnvelopeShowcase from "@/components/home/EnvelopeShowcase";
 import HowItWorks from "@/components/home/HowItWorks";
@@ -27,35 +26,33 @@ export default function HomePage() {
         Skip to main content
       </a>
 
-      <NavBar />
+      {/* Hero — includes its own nav */}
+      <HeroSection />
 
-      <main id="main-content">
-        {/* A — Hero */}
-        <Hero />
-
-        {/* C — Budget Simulator (id="features") */}
+      <div id="main-content">
+        {/* Budget Simulator */}
         <BudgetSimulator />
 
-        {/* D — Envelope Showcase */}
+        {/* Envelope Showcase */}
         <EnvelopeShowcase />
 
-        {/* E — How It Works (id="how-it-works") */}
+        {/* How It Works */}
         <HowItWorks />
 
-        {/* F — Emergency Vault Feature */}
+        {/* Emergency Vault Feature */}
         <EmergencyVaultFeature />
 
-        {/* G — Why It Matters (id="approach") */}
+        {/* Why It Matters */}
         <WhyItMatters />
 
-        {/* H — FAQ (id="faq") */}
+        {/* FAQ */}
         <FAQSection />
 
-        {/* I — Final CTA */}
+        {/* Final CTA */}
         <FinalCTA />
-      </main>
+      </div>
 
-      {/* J — Footer */}
+      {/* Footer */}
       <Footer />
     </>
   );
