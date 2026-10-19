@@ -3,265 +3,236 @@
 import Link from "next/link";
 
 export default function HeroSection() {
-  function scrollTo(href: string) {
-    if (href.startsWith("#")) {
-      document.querySelector(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+  function scrollTo(id: string) {
+    document.querySelector(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   return (
-    <main className="wh-page">
-      <nav className="wh-nav" aria-label="Main navigation">
-        <Link className="wh-brand" href="/" aria-label="WiseHaven home">
-          <span className="wh-brand-mark" aria-hidden="true">W</span>
-          <span>WiseHaven</span>
+    <div style={{ background: "#000", color: "#f7f8f3", fontFamily: "Inter, sans-serif" }}>
+
+      {/* ── Nav ───────────────────────────────────────────── */}
+      <nav
+        className="w-full flex items-center justify-between px-6 lg:px-12"
+        style={{ minHeight: "88px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}
+        aria-label="Main navigation"
+      >
+        <Link
+          href="/"
+          className="flex items-center gap-3 no-underline"
+          style={{ color: "#ffffff", fontSize: "19px", fontWeight: 750, letterSpacing: "-0.04em", fontFamily: "Geist, Inter, sans-serif" }}
+          aria-label="WiseHaven home"
+        >
+          <span
+            className="flex items-center justify-center font-black shrink-0"
+            style={{ width: "34px", height: "34px", background: "#bef532", color: "#080a04", borderRadius: "10px 10px 10px 3px", fontSize: "19px" }}
+            aria-hidden="true"
+          >
+            W
+          </span>
+          WiseHaven
         </Link>
 
-        <div className="wh-nav-links">
-          <a href="#how-it-works" onClick={(e) => { e.preventDefault(); scrollTo("#how-it-works"); }}>How it works</a>
-          <a href="#features"     onClick={(e) => { e.preventDefault(); scrollTo("#features"); }}>Smart envelopes</a>
-          <a href="#features"     onClick={(e) => { e.preventDefault(); scrollTo("#features"); }}>Emergency vault</a>
+        <div className="hidden md:flex items-center gap-8">
+          {[
+            { label: "How it works",    id: "#how-it-works" },
+            { label: "Smart envelopes", id: "#features"     },
+            { label: "Emergency vault", id: "#features"     },
+          ].map(({ label, id }) => (
+            <a
+              key={label}
+              href={id}
+              onClick={(e) => { e.preventDefault(); scrollTo(id); }}
+              style={{ color: "#b7b8b1", fontSize: "13px", textDecoration: "none", transition: "color 0.2s" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#bef532"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#b7b8b1"; }}
+            >
+              {label}
+            </a>
+          ))}
         </div>
 
-        <Link className="wh-nav-cta" href="/dashboard">
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 no-underline"
+          style={{ background: "#bef532", color: "#090b04", fontSize: "13px", fontWeight: 750, padding: "12px 18px", borderRadius: "6px", transition: "transform 0.2s ease, background 0.2s ease" }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLElement).style.background = "#d0ff65"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "none"; (e.currentTarget as HTMLElement).style.background = "#bef532"; }}
+        >
           Get started <span aria-hidden="true">↗</span>
         </Link>
       </nav>
 
-      <section className="wh-hero" aria-labelledby="wh-headline">
-        <div className="wh-copy">
-          <div className="wh-eyebrow">
-            <span className="wh-status-dot" />
-            SMART ENVELOPE WALLET
+      {/* ── Hero — two columns ────────────────────────────── */}
+      <section
+        className="w-full flex flex-col lg:flex-row items-center"
+        style={{ minHeight: "calc(100svh - 88px)", maxWidth: "1500px", margin: "0 auto", padding: "0 clamp(20px, 5vw, 80px)" }}
+        aria-labelledby="wh-headline"
+      >
+        {/* ── LEFT — Copy ────────────────────────────────── */}
+        <div
+          className="flex flex-col justify-center flex-1 py-16 lg:py-0"
+          style={{ maxWidth: "520px", zIndex: 2 }}
+        >
+          {/* Eyebrow */}
+          <div
+            className="flex items-center gap-2.5 mb-7"
+            style={{ color: "#bef532", fontSize: "10px", fontWeight: 750, letterSpacing: "2.4px" }}
+          >
+            <span
+              className="w-[7px] h-[7px] rounded-full shrink-0"
+              style={{ background: "#bef532", boxShadow: "0 0 14px rgba(190,245,50,0.60)" }}
+            />
+            SMART ENVELOPE WALLET · BUILT FOR RWANDA
           </div>
 
-          <h1 id="wh-headline">
+          {/* Headline */}
+          <h1
+            id="wh-headline"
+            style={{
+              fontFamily: "Geist, Inter, sans-serif",
+              fontSize: "clamp(48px, 6vw, 88px)",
+              fontWeight: 720,
+              letterSpacing: "-0.075em",
+              lineHeight: 0.97,
+              color: "#ffffff",
+              margin: 0,
+            }}
+          >
             Give Every
             <br />
             Franc a
             <br />
-            <span>Purpose.</span>
+            <span style={{ color: "#bef532" }}>Purpose.</span>
           </h1>
 
-          <p className="wh-description">
-            Lock in your priorities.
-            <br className="wh-desktop-break" />
-            Unlock financial peace of mind.
+          {/* Description */}
+          <p
+            style={{
+              marginTop: "24px",
+              maxWidth: "400px",
+              color: "#a6a79f",
+              fontSize: "clamp(15px, 1.3vw, 18px)",
+              lineHeight: 1.85,
+            }}
+          >
+            Lock in your priorities before you spend them.
+            <br />
+            Unlock financial peace of mind — one envelope at a time.
           </p>
 
-          <div className="wh-actions">
-            <Link className="wh-primary" href="/dashboard">
+          {/* CTAs */}
+          <div className="flex items-center flex-wrap gap-6 mt-9">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-3 no-underline"
+              style={{ background: "#bef532", color: "#090b04", fontSize: "14px", fontWeight: 750, minHeight: "52px", padding: "0 24px", borderRadius: "8px", transition: "transform 0.2s ease, background 0.2s ease" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLElement).style.background = "#d0ff65"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "none"; (e.currentTarget as HTMLElement).style.background = "#bef532"; }}
+            >
               Explore WiseHaven <span aria-hidden="true">↗</span>
             </Link>
+
             <a
-              className="wh-secondary"
               href="#how-it-works"
               onClick={(e) => { e.preventDefault(); scrollTo("#how-it-works"); }}
+              className="flex items-center gap-2"
+              style={{ color: "#b7b8b1", fontSize: "13px", textDecoration: "none", transition: "color 0.2s" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#bef532"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#b7b8b1"; }}
             >
               See how it works <span aria-hidden="true">→</span>
             </a>
           </div>
 
-          <div className="wh-note">
-            <span className="wh-note-icon">✓</span>
-            <span>Built for more intentional money habits.</span>
+          {/* Trust note */}
+          <div className="flex items-center gap-2.5 mt-12" style={{ color: "#777970", fontSize: "11px" }}>
+            <span
+              className="flex items-center justify-center w-5 h-5 rounded-full shrink-0"
+              style={{ border: "1px solid rgba(190,245,50,0.40)", color: "#bef532", fontSize: "9px" }}
+            >
+              ✓
+            </span>
+            Built for intentional money habits. Demo prototype — no real money.
           </div>
         </div>
 
+        {/* ── RIGHT — Video ───────────────────────────────── */}
         <div
-          className="wh-art"
-          aria-label="Abstract lime sculpture surrounded by protective orbital rings"
-          role="img"
+          className="relative flex-1 w-full lg:w-auto shrink-0"
+          style={{
+            minHeight: "360px",
+            maxHeight: "680px",
+            height: "clamp(360px, 55vh, 680px)",
+            maxWidth: "680px",
+            width: "100%",
+          }}
+          aria-hidden="true"
         >
-          <div className="wh-art-glow" />
-
-          <svg
-            className="wh-orbit wh-orbit-one"
-            viewBox="0 0 500 500"
-            fill="none"
-            aria-hidden="true"
+          {/* Video container — rounded, slight border, visible */}
+          <div
+            className="w-full h-full relative overflow-hidden"
+            style={{
+              borderRadius: "16px",
+              border: "1px solid rgba(255,255,255,0.10)",
+              boxShadow: "0 0 80px rgba(190,245,50,0.06), 0 32px 64px rgba(0,0,0,0.60)",
+            }}
           >
-            <ellipse
-              cx="250" cy="250"
-              rx="190" ry="94"
-              stroke="rgba(190,245,50,0.28)"
-              strokeWidth="1"
-              transform="rotate(-32 250 250)"
-            />
-          </svg>
-
-          <svg
-            className="wh-orbit wh-orbit-two"
-            viewBox="0 0 500 500"
-            fill="none"
-            aria-hidden="true"
-          >
-            <ellipse
-              cx="250" cy="250"
-              rx="176" ry="115"
-              stroke="rgba(255,255,255,0.16)"
-              strokeWidth="1"
-              transform="rotate(48 250 250)"
-            />
-          </svg>
-
-          <svg
-            className="wh-sculpture"
-            viewBox="0 0 420 440"
-            fill="none"
-            aria-hidden="true"
-          >
-            <defs>
-              <linearGradient id="wh-front" x1="100" y1="70" x2="320" y2="360" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#E4FF88" />
-                <stop offset=".35" stopColor="#BEF532" />
-                <stop offset=".75" stopColor="#83BA14" />
-                <stop offset="1"   stopColor="#405E0B" />
-              </linearGradient>
-
-              <linearGradient id="wh-side" x1="100" y1="150" x2="325" y2="310" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#A9E529" />
-                <stop offset="1" stopColor="#243606" />
-              </linearGradient>
-
-              <linearGradient id="wh-inner" x1="160" y1="140" x2="300" y2="300" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#101506" />
-                <stop offset="1" stopColor="#000000" />
-              </linearGradient>
-
-              <filter id="wh-shadow" x="20" y="10" width="390" height="420">
-                <feGaussianBlur stdDeviation="12" />
-              </filter>
-            </defs>
-
-            {/* Soft cast shadow */}
-            <path
-              d="M108 338 Q211 401 318 325"
-              stroke="#BEF532"
-              strokeWidth="23"
-              opacity=".22"
-              filter="url(#wh-shadow)"
+            <video
+              className="w-full h-full"
+              style={{ objectFit: "cover", objectPosition: "center", display: "block" }}
+              src="/BG video-muted.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
             />
 
-            {/* Outer sculptural loop */}
-            <path
-              d="M210 57
-                 C145 48 91 92 81 154
-                 C69 228 122 288 187 292
-                 C229 295 257 271 281 240
-                 L320 190
-                 C337 167 367 182 362 207
-                 C355 244 322 283 287 314
-                 C244 352 195 371 146 350
-                 C77 320 41 256 48 181
-                 C56 93 119 34 197 29
-                 C238 27 269 43 293 66
-                 L257 108
-                 C244 84 230 65 210 57Z"
-              fill="url(#wh-side)"
-              stroke="#D7FF73"
-              strokeWidth="1.4"
+            {/* Subtle left-edge fade — blends into black page behind copy */}
+            <div
+              className="absolute inset-y-0 left-0"
+              style={{
+                width: "40%",
+                background: "linear-gradient(to right, rgba(0,0,0,0.55), transparent)",
+                pointerEvents: "none",
+              }}
             />
 
-            {/* Inner recessed opening */}
-            <path
-              d="M201 105
-                 C159 102 125 134 123 175
-                 C121 218 151 250 190 253
-                 C214 255 233 241 252 216
-                 L286 173
-                 C303 151 335 151 350 174
-                 C363 194 354 222 338 243
-                 L310 276
-                 C283 309 240 330 198 326
-                 C133 320 88 270 89 203
-                 C90 143 130 96 181 84
-                 C212 77 240 88 258 105
-                 L235 135
-                 C224 116 215 107 201 105Z"
-              fill="url(#wh-inner)"
+            {/* Bottom-edge fade — merges into page */}
+            <div
+              className="absolute inset-x-0 bottom-0"
+              style={{
+                height: "30%",
+                background: "linear-gradient(to top, rgba(0,0,0,0.60), transparent)",
+                pointerEvents: "none",
+              }}
             />
-
-            {/* Folded ribbon crossing the opening */}
-            <path
-              d="M181 84
-                 C210 78 240 88 258 105
-                 L235 135
-                 C218 119 205 116 190 122
-                 C164 132 152 160 160 185
-                 C168 210 190 221 210 214
-                 L246 201
-                 L269 234
-                 L224 252
-                 C182 269 137 243 124 202
-                 C108 153 135 99 181 84Z"
-              fill="url(#wh-front)"
-              stroke="#DFFF88"
-              strokeWidth="1"
-            />
-
-            {/* Top folded highlight */}
-            <path
-              d="M181 84 C212 76 240 88 258 105 L235 135 C220 119 204 116 190 122Z"
-              fill="#E9FFAE"
-              opacity=".85"
-            />
-
-            {/* Lower inner ribbon */}
-            <path
-              d="M210 214
-                 C235 207 256 187 273 165
-                 L307 124
-                 C326 102 354 107 366 129
-                 C378 151 366 174 350 194
-                 L320 232
-                 C296 262 270 286 238 301
-                 L213 267
-                 C237 255 256 238 269 219
-                 L246 201Z"
-              fill="url(#wh-front)"
-            />
-
-            {/* Fine rim light */}
-            <path
-              d="M258 105 C280 125 278 147 262 169"
-              stroke="#F1FFD0"
-              strokeWidth="2"
-              strokeLinecap="round"
-              opacity=".8"
-            />
-          </svg>
-
-          <span className="wh-orbit-point wh-point-one" />
-          <span className="wh-orbit-point wh-point-two" />
-
-          <div className="wh-float-label wh-label-top">
-            <span className="wh-label-dot" />
-            <div>
-              <small>YOUR PRIORITIES</small>
-              <strong>Protected.</strong>
-            </div>
           </div>
 
-          <div className="wh-float-label wh-label-bottom">
-            <span className="wh-mini-symbol">↗</span>
-            <div>
-              <small>EVERY FRANC</small>
-              <strong>Has a purpose.</strong>
-            </div>
-          </div>
-
-          <span className="wh-art-index">01 / INTENTIONAL MONEY</span>
+          {/* Ambient lime glow behind the video */}
+          <div
+            className="absolute -z-10"
+            style={{
+              inset: "-40px",
+              background: "radial-gradient(ellipse at center, rgba(190,245,50,0.06) 0%, transparent 70%)",
+              filter: "blur(20px)",
+              pointerEvents: "none",
+            }}
+          />
         </div>
       </section>
 
-      <div className="wh-bottom-line">
+      {/* ── Bottom tagline bar ─────────────────────────────── */}
+      <div
+        className="flex items-center justify-center flex-wrap gap-4 px-6 py-5"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.06)", color: "#555", fontSize: "9px", letterSpacing: "1.8px" }}
+      >
         <span>PLAN WITH INTENTION</span>
-        <span className="wh-line" />
+        <span style={{ width: "28px", height: "1px", background: "#2a2a2a", display: "inline-block", verticalAlign: "middle" }} />
         <span>SPEND WITH CLARITY</span>
-        <span className="wh-line" />
+        <span style={{ width: "28px", height: "1px", background: "#2a2a2a", display: "inline-block", verticalAlign: "middle" }} />
         <span>BUILD YOUR HAVEN</span>
       </div>
-    </main>
+    </div>
   );
 }
