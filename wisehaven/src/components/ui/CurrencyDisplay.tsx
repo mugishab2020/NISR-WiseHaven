@@ -5,18 +5,29 @@ import { formatRWF } from "@/lib/currency";
 
 interface CurrencyDisplayProps {
   amount: number;
-  /** Size variant */
   size?: "xl" | "lg" | "md" | "sm";
-  /** Show RWF unit suffix */
   showUnit?: boolean;
-  /** Colour override */
   className?: string;
   unitClassName?: string;
 }
 
+const TEXT_SIZE: Record<string, string> = {
+  xl: "text-[40px] leading-[48px] tracking-[-0.02em] font-semibold",
+  lg: "text-[30px] leading-[38px] tracking-[-0.015em] font-semibold",
+  md: "text-[22px] leading-[28px] tracking-[-0.01em] font-medium",
+  sm: "text-[18px] leading-[24px] font-medium",
+};
+
+const UNIT_SIZE: Record<string, string> = {
+  xl: "text-[14px] leading-[20px] tracking-[0.02em]",
+  lg: "text-[12px] leading-[16px] tracking-[0.04em]",
+  md: "text-[10px] leading-[14px] tracking-[0.05em]",
+  sm: "text-[10px] leading-[14px] tracking-[0.05em]",
+};
+
 /**
- * Displays a RWF amount respecting the global privacy mode.
- * Uses JetBrains Mono with tabular figures.
+ * Displays a RWF amount respecting global privacy mode.
+ * Enforces JetBrains Mono with tnum + slashed-zero OpenType features.
  */
 export default function CurrencyDisplay({
   amount,
@@ -27,33 +38,21 @@ export default function CurrencyDisplay({
 }: CurrencyDisplayProps) {
   const { privacyMode } = useApp();
 
-  const textSizeMap = {
-    xl: "font-headline-xl text-headline-xl",
-    lg: "font-headline-lg text-headline-lg",
-    md: "font-headline-md text-headline-md",
-    sm: "font-headline-sm text-headline-sm",
-  };
-
-  const unitSizeMap = {
-    xl: "font-label-lg text-label-lg",
-    lg: "font-label-md text-label-md",
-    md: "font-label-sm text-label-sm",
-    sm: "font-label-sm text-label-sm",
-  };
-
   const displayValue = privacyMode ? "••••••" : formatRWF(amount);
 
   return (
     <span className="inline-flex items-baseline gap-1.5">
       <span
-        className={`font-mono tabular-nums font-bold text-primary ${textSizeMap[size]} ${className ?? ""}`}
+        className={`font-mono tabular-nums font-bold text-primary-fixed ${TEXT_SIZE[size]} ${className ?? ""}`}
+        style={{ fontFeatureSettings: '"tnum" 1, "zero" 1, "ss01" 1' }}
         aria-label={privacyMode ? "Hidden amount" : `${formatRWF(amount)} Rwandan francs`}
       >
         {displayValue}
       </span>
       {showUnit && (
         <span
-          className={`font-mono text-primary-fixed ${unitSizeMap[size]} ${unitClassName ?? ""}`}
+          className={`font-mono text-outline font-medium ${UNIT_SIZE[size]} ${unitClassName ?? ""}`}
+          style={{ fontFeatureSettings: '"tnum" 1, "zero" 1' }}
         >
           RWF
         </span>

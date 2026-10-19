@@ -11,189 +11,214 @@ import { formatCountdown, formatDate, calcElapsedFraction } from "@/lib/dates";
 import { formatRWF } from "@/lib/currency";
 import type { EnvelopeStatus } from "@/types";
 import {
-  Plus, Lock, Search, ArrowRight, Wallet, Home, ShoppingBasket,
-  School, Zap, Truck, Heart, Users, Briefcase
+  Plus, Lock, Search, ArrowRight, Wallet,
+  Home, ShoppingBasket, School, Zap, Truck, Heart, Users, Briefcase,
 } from "lucide-react";
 
 const FILTER_PILLS: { label: string; value: EnvelopeStatus | "all" | "completed" }[] = [
-  { label: "All", value: "all" },
-  { label: "Locked", value: "locked" },
-  { label: "Unlocking Soon", value: "unlocking_soon" },
-  { label: "Ready to Pay", value: "ready_to_pay" },
-  { label: "Paid / Completed", value: "paid" },
+  { label: "All Active",       value: "all"           },
+  { label: "Locked",           value: "locked"        },
+  { label: "Unlocking Soon",   value: "unlocking_soon"},
+  { label: "Ready to Pay",     value: "ready_to_pay"  },
+  { label: "Paid",             value: "paid"          },
 ];
 
 const ICON_MAP: Record<string, typeof Lock> = {
-  home_work: Home,
-  shopping_basket: ShoppingBasket,
-  bolt: Zap,
-  school: School,
-  truck: Truck,
-  heart: Heart,
-  users: Users,
-  briefcase: Briefcase,
+  home_work: Home, shopping_basket: ShoppingBasket, bolt: Zap,
+  school: School, truck: Truck, heart: Heart, users: Users, briefcase: Briefcase,
 };
 
-function EnvIcon({ icon, className }: { icon: string; className?: string }) {
+function EnvIcon({ icon, size = 18 }: { icon: string; size?: number }) {
   const Icon = ICON_MAP[icon] ?? Lock;
-  return <Icon size={18} className={className} />;
+  return <Icon size={size} />;
 }
+
+const CARD: React.CSSProperties = {
+  background: "#171717",
+  border: "1px solid #242424",
+  borderRadius: "12px",
+};
 
 export default function EnvelopesPage() {
   const { account, availableFunds, privacyMode } = useApp();
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<EnvelopeStatus | "all" | "completed">("all");
+  const [search, setSearch]   = useState("");
+  const [filter, setFilter]   = useState<EnvelopeStatus | "all" | "completed">("all");
 
-  const totalInEnvelopes = account.envelopes
-    .filter((e) => e.status !== "paid" && e.status !== "cancelled")
-    .reduce((s, e) => s + e.amount, 0);
+  const active     = account.envelopes.filter((e) => e.status !== "paid" && e.status !== "cancelled");
+  const locked     = account.envelopes.filter((e) => e.status === "locked");
+  const unlocking  = account.envelopes.filter((e) => e.status === "unlocking_soon");
+  const ready      = account.envelopes.filter((e) => e.status === "ready_to_pay");
+  const paid       = account.envelopes.filter((e) => e.status === "paid");
 
-  const locked = account.envelopes.filter((e) => e.status === "locked");
-  const unlocking = account.envelopes.filter((e) => e.status === "unlocking_soon");
-  const ready = account.envelopes.filter((e) => e.status === "ready_to_pay");
-  const paid = account.envelopes.filter((e) => e.status === "paid");
+  const totalInEnvelopes = active.reduce((s, e) => s + e.amount, 0);
 
   const filtered = account.envelopes.filter((e) => {
-    const matchesFilter =
-      filter === "all"
-        ? e.status !== "paid" && e.status !== "cancelled"
-        : filter === "paid"
-          ? e.status === "paid" || e.status === "cancelled"
-          : e.status === filter;
-
-    const matchesSearch =
-      !search ||
-      e.name.toLowerCase().includes(search.toLowerCase()) ||
-      e.categoryLabel.toLowerCase().includes(search.toLowerCase()) ||
-      e.recipient.toLowerCase().includes(search.toLowerCase());
-
-    return matchesFilter && matchesSearch;
+    const matchFilter = filter === "all"
+      ? e.status !== "paid" && e.status !== "cancelled"
+      : filter === "paid"
+        ? e.status === "paid" || e.status === "cancelled"
+        : e.status === filter;
+    const matchSearch = !search
+      || e.name.toLowerCase().includes(search.toLowerCase())
+      || e.categoryLabel.toLowerCase().includes(search.toLowerCase())
+      || e.recipient.toLowerCase().includes(search.toLowerCase());
+    return matchFilter && matchSearch;
   });
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 pb-6">
-        {/* Header */}
+      <div className="flex flex-col gap-5 pb-6">
+
+        {/* ── Header ─────────────────────────────────────── */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pt-1">
           <div>
-            <div className="flex items-center gap-2 text-primary-fixed mb-1">
-              <Lock size={14} />
-              <span className="font-label-sm text-label-sm uppercase tracking-widest text-primary-fixed">
-                Enforce Discipline • Kigali UTC+2
+            <div className="flex items-center gap-2 mb-2">
+              <Lock size={13} style={{ color: "#bef532" }} />
+              <span
+                className="font-label-sm text-label-sm uppercase tracking-[0.18em]"
+                style={{ color: "#bef532" }}
+              >
+                Enforce Discipline · Kigali UTC+2
               </span>
             </div>
-            <h1 className="font-geist font-semibold text-headline-xl-mobile lg:text-headline-xl text-primary tracking-tight">
+            <h1 className="font-geist font-semibold text-[28px] lg:text-[40px] text-white tracking-tight leading-none">
               Your Envelopes
             </h1>
-            <p className="font-body-md text-body-md text-secondary max-w-xl mt-1">
-              Every envelope protects money for something that matters. Funds stay
-              locked until their maturity date.
+            <p className="font-body-md text-body-md mt-1.5 max-w-lg" style={{ color: "#b5b5b5" }}>
+              Every envelope protects money for something that matters.
+              Funds stay locked until their maturity date.
             </p>
           </div>
           <Link
             href="/envelopes/new"
-            className="flex items-center gap-2 px-4 py-3 rounded bg-primary-container text-on-primary font-body-md text-body-md font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary-container/10 self-start"
+            className="flex items-center gap-2 px-5 py-3 rounded-lg font-body-md text-body-md font-semibold transition-opacity hover:opacity-90 active:scale-[0.98] self-start"
+            style={{ background: "#bef532", color: "#000000" }}
           >
-            <Plus size={18} />
-            Create New Envelope
+            <Plus size={16} />
+            New Envelope
           </Link>
         </div>
 
-        {/* Metrics bar */}
+        {/* ── Metrics bar ─────────────────────────────────── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="p-4 rounded bg-surface-container-low border border-surface-container flex flex-col gap-2">
+          {/* Total */}
+          <div className="p-4 rounded-xl flex flex-col gap-2" style={CARD}>
             <div className="flex items-center justify-between">
-              <span className="font-label-sm text-label-sm text-outline uppercase">Total in Envelopes</span>
-              <Wallet size={16} className="text-primary-fixed" />
+              <span className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>
+                In Envelopes
+              </span>
+              <Wallet size={14} style={{ color: "#bef532" }} />
             </div>
             <CurrencyDisplay amount={totalInEnvelopes} size="md" />
-            <span className="font-body-sm text-body-sm text-secondary">
-              {account.envelopes.filter(e => e.status !== "paid" && e.status !== "cancelled").length} envelopes
+            <span className="font-body-sm text-body-sm" style={{ color: "#808080" }}>
+              {active.length} active
             </span>
           </div>
-          <div className="p-4 rounded bg-surface-container-low border border-surface-container flex flex-col gap-2">
+
+          {/* Locked */}
+          <div className="p-4 rounded-xl flex flex-col gap-2" style={CARD}>
             <div className="flex items-center justify-between">
-              <span className="font-label-sm text-label-sm text-outline uppercase">Locked</span>
-              <span className="inline-flex items-center gap-1 font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-highest text-primary-fixed font-mono">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary-fixed" />
+              <span className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>
+                Locked
+              </span>
+              <span
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-label-sm text-label-sm font-mono font-semibold"
+                style={{ background: "rgba(190,245,50,0.08)", color: "#bef532" }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#bef532" }} />
                 {locked.length}
               </span>
             </div>
             <CurrencyDisplay amount={locked.reduce((s, e) => s + e.amount, 0)} size="md" />
-            <span className="font-body-sm text-body-sm text-secondary">Non-negotiable</span>
+            <span className="font-body-sm text-body-sm" style={{ color: "#808080" }}>Non-negotiable</span>
           </div>
-          <div className="p-4 rounded bg-surface-container-low border border-surface-container flex flex-col gap-2">
+
+          {/* Unlocking Soon */}
+          <div className="p-4 rounded-xl flex flex-col gap-2" style={CARD}>
             <div className="flex items-center justify-between">
-              <span className="font-label-sm text-label-sm text-outline uppercase">Unlocking Soon</span>
-              <span className="inline-flex items-center gap-1 font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-primary-container/10 text-primary-fixed font-mono animate-pulse">
+              <span className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>
+                Unlocking
+              </span>
+              <span
+                className="px-1.5 py-0.5 rounded font-label-sm text-label-sm font-mono font-semibold animate-pulse"
+                style={{ background: "rgba(255,184,0,0.10)", color: "#ffb800" }}
+              >
                 {unlocking.length}
               </span>
             </div>
-            <CurrencyDisplay amount={unlocking.reduce((s, e) => s + e.amount, 0)} size="md" className="text-primary-fixed" />
-            <span className="font-body-sm text-body-sm text-on-surface-variant">Maturing soon</span>
+            <CurrencyDisplay amount={unlocking.reduce((s, e) => s + e.amount, 0)} size="md" />
+            <span className="font-body-sm text-body-sm" style={{ color: "#ffb800" }}>Maturing soon</span>
           </div>
-          <div className="p-4 rounded bg-surface-container-low border border-surface-container flex flex-col gap-2">
+
+          {/* Ready to Pay */}
+          <div className="p-4 rounded-xl flex flex-col gap-2" style={CARD}>
             <div className="flex items-center justify-between">
-              <span className="font-label-sm text-label-sm text-outline uppercase">Ready to Pay</span>
-              <span className="inline-flex items-center gap-1 font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-primary-container text-on-primary font-mono">
+              <span className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>
+                Ready to Pay
+              </span>
+              <span
+                className="px-1.5 py-0.5 rounded font-label-sm text-label-sm font-mono font-bold"
+                style={ready.length > 0 ? { background: "#bef532", color: "#000000" } : { background: "#202020", color: "#808080" }}
+              >
                 {ready.length}
               </span>
             </div>
-            <CurrencyDisplay amount={ready.reduce((s, e) => s + e.amount, 0)} size="md" className={ready.length > 0 ? "text-primary-fixed" : "text-outline"} />
-            <span className="font-body-sm text-body-sm text-secondary">
+            <CurrencyDisplay amount={ready.reduce((s, e) => s + e.amount, 0)} size="md" />
+            <span className="font-body-sm text-body-sm" style={{ color: ready.length > 0 ? "#bef532" : "#808080" }}>
               {ready.length > 0 ? "Confirm payment" : "All secured"}
             </span>
           </div>
         </div>
 
-        {/* Search + filter */}
-        <div className="flex flex-col gap-3 bg-surface-container-low p-4 rounded border border-surface-container">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-outline" />
+        {/* ── Search + filter bar ─────────────────────────── */}
+        <div className="flex flex-col gap-3 p-4 rounded-xl" style={CARD}>
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "#808080" }} />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-11 pl-9 pr-4 rounded bg-surface-container text-primary placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:ring-1 focus:ring-primary-fixed transition-all"
+              className="w-full h-10 pl-9 pr-4 rounded-lg font-body-sm text-body-sm text-white placeholder:text-[#808080] focus:outline-none transition-all"
+              style={{ background: "#0d0d0d", border: "1px solid #303030" }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "#bef532"; e.currentTarget.style.boxShadow = "0 0 0 1px #bef532"; }}
+              onBlur={(e)  => { e.currentTarget.style.borderColor = "#303030"; e.currentTarget.style.boxShadow = "none"; }}
               placeholder="Search by name, category, or recipient…"
               type="text"
               aria-label="Search envelopes"
             />
           </div>
 
-          {/* Filter pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-0.5">
-            {FILTER_PILLS.map((p) => (
-              <button
-                key={p.value}
-                onClick={() => setFilter(p.value)}
-                className={`
-                  px-3 py-1.5 rounded-full font-label-md text-label-md font-semibold transition-all whitespace-nowrap flex items-center gap-1.5
-                  ${filter === p.value
-                    ? "bg-primary-container text-on-primary"
-                    : "bg-surface-container hover:bg-surface-container-high text-secondary"
+            {FILTER_PILLS.map((p) => {
+              const count = p.value === "all"
+                ? active.length
+                : p.value === "paid"
+                  ? paid.length
+                  : account.envelopes.filter(e => e.status === p.value).length;
+              const active_ = filter === p.value;
+              const isAmber = p.value === "unlocking_soon";
+
+              return (
+                <button
+                  key={p.value}
+                  onClick={() => setFilter(p.value)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-label-sm text-label-sm font-medium whitespace-nowrap transition-all"
+                  style={
+                    active_
+                      ? { background: isAmber ? "rgba(255,184,0,0.15)" : "#bef532", color: isAmber ? "#ffb800" : "#000000" }
+                      : { background: "#202020", color: "#808080", border: "1px solid #303030" }
                   }
-                `}
-                aria-pressed={filter === p.value}
-              >
-                {p.value === "unlocking_soon" && (
-                  <span className="w-2 h-2 rounded-full bg-current animate-ping" />
-                )}
-                {p.label}{" "}
-                <span className="opacity-70">
-                  ({p.value === "all"
-                    ? account.envelopes.filter(e => e.status !== "paid" && e.status !== "cancelled").length
-                    : p.value === "paid"
-                      ? paid.length
-                      : account.envelopes.filter(e => e.status === p.value).length
-                  })
-                </span>
-              </button>
-            ))}
+                  aria-pressed={active_}
+                >
+                  {isAmber && <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#ffb800" }} />}
+                  {p.label}
+                  <span style={{ opacity: 0.6 }}>({count})</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Envelopes grid */}
+        {/* ── Envelopes grid ──────────────────────────────── */}
         {filtered.length === 0 ? (
           <EmptyState
             icon={Lock}
@@ -205,135 +230,158 @@ export default function EnvelopesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {filtered.map((envelope) => {
-              const elapsed = calcElapsedFraction(envelope.createdAt, envelope.maturityDate);
+              const elapsed   = calcElapsedFraction(envelope.createdAt, envelope.maturityDate);
               const countdown = formatCountdown(envelope.maturityDate);
-              const maturityStr = formatDate(envelope.maturityDate);
-              const isActive = envelope.status === "unlocking_soon" || envelope.status === "ready_to_pay";
+              const maturity  = formatDate(envelope.maturityDate);
+              const isUnlocking = envelope.status === "unlocking_soon";
+              const isReady     = envelope.status === "ready_to_pay";
+              const isPaid      = envelope.status === "paid";
+
+              const accent = isUnlocking ? "#ffb800" : "#bef532";
+              const border = isUnlocking
+                ? "rgba(255,184,0,0.30)"
+                : isReady
+                  ? "rgba(190,245,50,0.25)"
+                  : isPaid
+                    ? "#1a1a1a"
+                    : "#242424";
+              const bg = isUnlocking
+                ? "rgba(255,184,0,0.02)"
+                : isReady
+                  ? "rgba(190,245,50,0.02)"
+                  : "#171717";
 
               return (
                 <div
                   key={envelope.id}
-                  className={`
-                    group relative flex flex-col justify-between p-4 rounded border transition-all
-                    ${isActive
-                      ? "bg-surface-container-high border-primary-fixed/40 hover:border-primary-fixed shadow-lg"
-                      : envelope.status === "paid"
-                        ? "bg-surface-container-lowest border-surface-container opacity-70"
-                        : "bg-surface-container-low border-surface-container hover:bg-surface-container hover:border-surface-variant"
-                    }
-                  `}
+                  className="group relative flex flex-col justify-between p-4 rounded-xl"
+                  style={{
+                    background: bg,
+                    border: `1px solid ${border}`,
+                    boxShadow: (isUnlocking || isReady)
+                      ? `0 0 24px rgba(${isUnlocking ? "255,184,0" : "190,245,50"},0.06)`
+                      : "none",
+                    opacity: isPaid ? 0.6 : 1,
+                    transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+                  }}
                 >
                   {/* Accent top bar */}
-                  {isActive && (
-                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary-fixed rounded-t" />
+                  {(isUnlocking || isReady) && (
+                    <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-xl" style={{ background: accent }} />
                   )}
 
                   <div className="flex flex-col gap-4">
                     {/* Header */}
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded flex items-center justify-center ${isActive ? "bg-primary-container text-on-primary" : "bg-surface-container-high text-primary group-hover:bg-primary-container group-hover:text-on-primary transition-colors"}`}>
-                          <EnvIcon icon={envelope.icon} />
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className="w-9 h-9 rounded-lg flex items-center justify-center"
+                          style={{
+                            background: (isUnlocking || isReady) ? `rgba(${isUnlocking ? "255,184,0" : "190,245,50"},0.12)` : "#202020",
+                            color: (isUnlocking || isReady) ? accent : "#808080",
+                          }}
+                        >
+                          <EnvIcon icon={envelope.icon} size={16} />
                         </div>
                         <div>
-                          <h3 className="font-headline-sm text-headline-sm font-semibold text-primary leading-tight">
+                          <h3 className="font-body-md text-body-md font-semibold text-white leading-tight group-hover:text-[#bef532] transition-colors">
                             {envelope.name}
                           </h3>
-                          <span className="font-label-sm text-label-sm text-outline">
+                          <p className="font-label-sm text-label-sm" style={{ color: "#808080" }}>
                             {envelope.categoryLabel}
-                          </span>
+                          </p>
                         </div>
                       </div>
                       <EnvelopeStatusBadge status={envelope.status} />
                     </div>
 
-                    {/* Recipient */}
-                    <div className="px-3 py-1.5 rounded bg-surface-container flex items-center justify-between">
-                      <span className="font-label-sm text-label-sm text-outline uppercase font-mono">
-                        Recipient
+                    {/* Recipient tag */}
+                    <div
+                      className="px-3 py-1.5 rounded-lg flex items-center justify-between"
+                      style={{ background: "rgba(0,0,0,0.3)" }}
+                    >
+                      <span className="font-label-sm text-label-sm uppercase font-mono" style={{ color: "#808080" }}>
+                        To
                       </span>
-                      <span className="text-on-surface font-medium font-body-sm text-body-sm truncate ml-2 text-right">
+                      <span className="font-body-sm text-body-sm font-medium text-white truncate ml-2">
                         {envelope.recipient}
                       </span>
                     </div>
 
                     {/* Amount */}
                     <div>
-                      <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">
+                      <span className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>
                         Secured Capital
                       </span>
-                      <div className="mt-0.5">
-                        <CurrencyDisplay amount={envelope.amount} size="lg" className={isActive ? "text-primary-fixed" : undefined} />
+                      <div className="mt-1">
+                        <CurrencyDisplay amount={envelope.amount} size="lg" />
                       </div>
                     </div>
 
-                    {/* Progress */}
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center justify-between font-label-sm text-label-sm">
-                        <span className="text-outline font-mono">Countdown</span>
-                        <span className={`font-mono font-medium ${isActive ? "text-primary-fixed font-bold" : "text-primary"}`}>
-                          {countdown}
+                    {/* Lock progress */}
+                    {!isPaid && (
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="font-label-sm text-label-sm" style={{ color: "#808080" }}>Countdown</span>
+                          <span
+                            className="font-mono font-semibold text-[11px] tracking-wider"
+                            style={{ color: accent, fontFeatureSettings: '"tnum" 1' }}
+                          >
+                            {countdown}
+                          </span>
+                        </div>
+                        <div className="w-full h-[4px] rounded-full overflow-hidden" style={{ background: "#242424" }}>
+                          <div
+                            className="h-full rounded-full transition-all"
+                            style={{ width: `${Math.round(elapsed * 100)}%`, background: accent }}
+                          />
+                        </div>
+                        <span className="font-label-sm text-label-sm font-mono" style={{ color: "#808080" }}>
+                          Matures: <span className="text-white">{maturity}</span>
                         </span>
                       </div>
-                      <div className="w-full bg-surface-container-highest h-1.5 rounded overflow-hidden flex gap-0.5">
-                        <div
-                          className="bg-primary-fixed h-full"
-                          style={{ width: `${Math.round(elapsed * 100)}%` }}
-                        />
-                        <div
-                          className="bg-surface-variant h-full flex-1"
-                        />
-                      </div>
-                      <div className="flex items-center justify-between font-label-sm text-label-sm text-secondary pt-0.5">
-                        <span>Matures: <strong className="text-on-surface">{maturityStr}</strong></span>
-                      </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* CTA */}
                   <Link
                     href={`/envelopes/${envelope.id}`}
-                    className={`
-                      mt-4 w-full py-2.5 px-3 rounded font-body-sm text-body-sm font-medium flex items-center justify-center gap-1.5 transition-colors
-                      ${envelope.status === "ready_to_pay"
-                        ? "bg-primary-container hover:opacity-90 text-on-primary font-semibold"
-                        : "bg-surface-container hover:bg-surface-container-high text-primary group-hover:text-primary-fixed"
-                      }
-                    `}
+                    className="mt-4 w-full py-2.5 px-3 rounded-lg font-body-sm text-body-sm font-semibold flex items-center justify-center gap-1.5 transition-all"
+                    style={
+                      isReady
+                        ? { background: "#bef532", color: "#000000" }
+                        : isUnlocking
+                          ? { background: "rgba(255,184,0,0.10)", color: "#ffb800", border: "1px solid rgba(255,184,0,0.25)" }
+                          : { background: "#202020", color: "#b5b5b5", border: "1px solid #303030" }
+                    }
                   >
-                    {envelope.status === "ready_to_pay" ? "Confirm Payment" : "View Details"}
-                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    {isReady ? "Confirm Payment" : "View Details"}
+                    <ArrowRight size={13} />
                   </Link>
                 </div>
               );
             })}
 
-            {/* Add envelope card */}
+            {/* Add new envelope card */}
             {filter === "all" && !search && availableFunds > 0 && (
               <Link
                 href="/envelopes/new"
-                className="group relative flex flex-col justify-between p-4 rounded bg-surface-container-low/40 hover:bg-surface-container-low transition-all border border-dashed border-surface-container-high"
+                className="group flex flex-col items-center justify-center p-6 rounded-xl gap-3 text-center transition-all"
+                style={{ background: "transparent", border: "1px dashed #303030" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#171717"; (e.currentTarget as HTMLElement).style.borderColor = "#bef532"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.borderColor = "#303030"; }}
               >
-                <div className="flex flex-col items-center text-center justify-center h-full py-8 gap-3">
-                  <div className="w-14 h-14 rounded-full bg-surface-container flex items-center justify-center text-primary-fixed group-hover:scale-110 transition-transform shadow-md">
-                    <Plus size={24} />
-                  </div>
-                  <div>
-                    <h4 className="font-headline-sm text-headline-sm font-semibold text-primary">
-                      Add Priority Envelope
-                    </h4>
-                    <p className="font-body-sm text-body-sm text-secondary mt-1">
-                      Give your{" "}
-                      <span className="text-primary-fixed font-semibold font-mono">
-                        {privacyMode ? "••••••" : `${formatRWF(availableFunds)} RWF`}
-                      </span>{" "}
-                      a destination.
-                    </p>
-                  </div>
-                  <span className="mt-2 px-4 py-2 rounded bg-surface-container-high hover:bg-primary-container hover:text-on-primary text-primary font-body-md text-body-md font-semibold transition-all flex items-center gap-2">
-                    <Lock size={14} />
-                    Create Envelope
-                  </span>
+                <div
+                  className="w-12 h-12 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"
+                  style={{ background: "#202020" }}
+                >
+                  <Plus size={20} style={{ color: "#bef532" }} />
+                </div>
+                <div>
+                  <p className="font-body-md text-body-md font-semibold text-white">New Envelope</p>
+                  <p className="font-body-sm text-body-sm mt-0.5" style={{ color: "#808080" }}>
+                    {privacyMode ? "Funds available" : `${formatRWF(availableFunds)} RWF`} free
+                  </p>
                 </div>
               </Link>
             )}

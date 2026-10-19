@@ -12,8 +12,8 @@
   body {
     margin: 0;
     padding: 0;
-    background-color: #131313;
-    color: #e5e2e1;
+    background-color: #0a0a0a;
+    color: #ffffff;
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -36,13 +36,22 @@
   /* Selection color — lime on black */
   ::selection {
     background-color: #bef532;
-    color: #151f00;
+    color: #000000;
   }
 
   /* Focus ring — lime */
   :focus-visible {
     outline: 2px solid #bef532;
     outline-offset: 2px;
+  }
+
+  /* Enforce tabular figures + slashed zero on all monospace elements */
+  .font-mono,
+  [class*="font-jetbrains"],
+  [class*="font-label"],
+  code, kbd, pre {
+    font-feature-settings: "tnum" 1, "zero" 1, "ss01" 1;
+    font-variant-numeric: tabular-nums;
   }
 }
 
@@ -196,7 +205,7 @@
   /* Tabular numeric figures for financial readouts */
   .tabular-nums {
     font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum" 1, "zero" 1;
+    font-feature-settings: "tnum" 1, "zero" 1, "ss01" 1;
   }
 
   /* Safe area padding for mobile */
@@ -207,12 +216,77 @@
     padding-top: env(safe-area-inset-top, 0px);
   }
 
-  /* Lime glow for highlights */
+  /* Lime glow utilities */
   .glow-lime {
-    box-shadow: 0 0 24px rgba(190, 245, 50, 0.08);
+    box-shadow: 0 0 24px rgba(190, 245, 50, 0.06);
   }
-  .glow-lime-focus:focus {
-    box-shadow: 0 0 0 1px #bef532;
+  .glow-lime-md {
+    box-shadow: 0 0 32px rgba(190, 245, 50, 0.10);
+  }
+  .glow-lime-lg {
+    box-shadow: 0 0 48px rgba(190, 245, 50, 0.15);
+  }
+
+  /* Amber glow — unlocking soon cards */
+  .glow-amber {
+    box-shadow: 0 0 24px rgba(255, 184, 0, 0.08);
+  }
+
+  /* Focus lime ring glow — inputs */
+  .focus-glow:focus {
+    box-shadow: 0 0 0 1px #bef532, 0 0 8px rgba(190, 245, 50, 0.20);
+    border-color: #bef532;
+    outline: none;
+  }
+
+  /* Input base style */
+  .wh-input {
+    width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    background: #141414;
+    color: #ffffff;
+    border: 1px solid #242424;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .wh-input::placeholder {
+    color: #808080;
+  }
+  .wh-input:focus {
+    outline: none;
+    border-color: #bef532;
+    box-shadow: 0 0 0 1px #bef532, 0 0 8px rgba(190, 245, 50, 0.15);
+  }
+
+  /* Card with hairline border */
+  .wh-card {
+    background: #171717;
+    border: 1px solid #242424;
+    border-radius: 12px;
+  }
+  .wh-card:hover {
+    border-color: #303030;
+    box-shadow: 0 0 24px rgba(190, 245, 50, 0.04);
+  }
+
+  /* Stepper node */
+  .wh-step-active {
+    background: #bef532;
+    color: #000000;
+    border: none;
+  }
+  .wh-step-done {
+    background: #171717;
+    color: #bef532;
+    border: 1px solid #bef532;
+  }
+  .wh-step-idle {
+    background: #171717;
+    color: #808080;
+    border: 1px solid #242424;
   }
 }
 
@@ -220,22 +294,26 @@
 @layer components {
   /* Primary lime button */
   .btn-primary {
-    @apply px-4 py-2.5 rounded bg-primary-container text-on-primary font-semibold text-body-md hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2;
+    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-primary-container text-on-primary font-semibold text-body-md hover:opacity-90 active:scale-[0.98] transition-all;
   }
 
   /* Secondary dark button */
   .btn-secondary {
-    @apply px-4 py-2.5 rounded bg-surface-container text-on-surface font-medium text-body-md hover:bg-surface-container-high border border-surface-container-high transition-colors flex items-center justify-center gap-2;
+    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-surface-container-high text-on-surface font-medium text-body-md border border-border-hairline hover:border-border-interactive transition-colors;
   }
 
   /* Destructive / emergency button */
   .btn-destructive {
-    @apply px-4 py-2.5 rounded bg-error-container/20 text-error font-semibold text-body-md hover:bg-error-container/30 border border-error/20 transition-all flex items-center justify-center gap-2;
+    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-error-container text-error font-semibold text-body-md border border-error/30 hover:bg-error-container/80 transition-all;
   }
 
-  /* Form input */
+  /* Form input — matches spec: #141414 bg, 48px h, lime focus glow */
   .input-base {
-    @apply w-full h-12 px-4 rounded bg-surface-container text-on-surface placeholder:text-outline font-body-md text-body-md border border-surface-container-high focus:outline-none focus:border-primary-fixed focus:ring-1 focus:ring-primary-fixed transition-all;
+    @apply w-full h-12 px-4 rounded-lg bg-surface-container-high text-on-surface placeholder:text-outline font-body-md text-body-md border border-border-hairline focus:outline-none focus:border-primary-fixed transition-all;
+    font-feature-settings: "tnum" 1, "zero" 1;
+  }
+  .input-base:focus {
+    box-shadow: 0 0 0 1px #bef532, 0 0 8px rgba(190, 245, 50, 0.15);
   }
 
   /* Label */
@@ -243,34 +321,53 @@
     @apply font-label-sm text-label-sm text-outline uppercase tracking-wider;
   }
 
-  /* Status badge base */
+  /* ── Status badges ──────────────────────────────────────── */
   .badge {
     @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-label-sm text-label-sm font-medium;
   }
 
-  /* Locked badge */
+  /* Locked — lime ghost */
   .badge-locked {
-    @apply badge bg-primary-container/10 text-primary-fixed border border-primary-fixed/20;
+    @apply badge border;
+    background: rgba(190, 245, 50, 0.08);
+    color: #bef532;
+    border-color: rgba(190, 245, 50, 0.20);
   }
 
-  /* Unlocking soon badge */
+  /* Unlocking Soon — amber */
   .badge-unlocking {
-    @apply badge bg-primary-container text-on-primary font-bold animate-pulse;
+    @apply badge border;
+    background: rgba(255, 184, 0, 0.10);
+    color: #ffb800;
+    border-color: rgba(255, 184, 0, 0.25);
   }
 
-  /* Ready to pay badge */
+  /* Ready to Pay — solid lime */
   .badge-ready {
-    @apply badge bg-primary-container text-on-primary font-bold;
+    @apply badge font-bold;
+    background: #bef532;
+    color: #000000;
   }
 
-  /* Paid badge */
+  /* Paid — muted */
   .badge-paid {
-    @apply badge bg-surface-container-high text-outline;
+    @apply badge bg-surface-container-highest text-outline;
+  }
+
+  /* Cancelled */
+  .badge-cancelled {
+    @apply badge border border-error/20 text-error;
+    background: rgba(255, 68, 68, 0.08);
   }
 
   /* Card base */
   .card {
-    @apply rounded-xl bg-surface-container-low border border-surface-container p-space-md;
+    @apply rounded-xl bg-surface-container border border-border-hairline;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .card:hover {
+    border-color: #303030;
+    box-shadow: 0 0 24px rgba(190, 245, 50, 0.04);
   }
 
   /* Section heading */

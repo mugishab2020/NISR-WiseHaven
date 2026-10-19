@@ -1,13 +1,9 @@
 "use client";
 
 import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  type ReactNode,
+  createContext, useContext, useState, useCallback, type ReactNode,
 } from "react";
-import { CheckCircle, AlertCircle, X } from "lucide-react";
+import { CheckCircle, AlertCircle, Info, X } from "lucide-react";
 
 type ToastType = "success" | "error" | "info";
 
@@ -38,6 +34,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
+  const ACCENT: Record<ToastType, string> = {
+    success: "#bef532",
+    error:   "#ff6b6b",
+    info:    "#808080",
+  };
+
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
@@ -45,38 +47,35 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <div
         aria-live="polite"
         aria-atomic="false"
-        className="fixed bottom-20 lg:bottom-6 right-4 z-[100] flex flex-col gap-2 max-w-sm w-full"
+        className="fixed bottom-20 lg:bottom-6 right-4 z-[100] flex flex-col gap-2 max-w-sm w-full pointer-events-none"
       >
         {toasts.map((toast) => (
           <div
             key={toast.id}
             role="alert"
-            className={`
-              flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl border
-              ${
-                toast.type === "success"
-                  ? "bg-surface-container-low border-primary-fixed/20 text-on-surface"
-                  : toast.type === "error"
-                    ? "bg-surface-container-low border-error/20 text-on-surface"
-                    : "bg-surface-container-low border-surface-container-high text-on-surface"
-              }
-              animate-in slide-in-from-right-5 fade-in
-            `}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl pointer-events-auto"
+            style={{
+              background: "#171717",
+              border: "1px solid #303030",
+              borderLeft: `3px solid ${ACCENT[toast.type]}`,
+              boxShadow: "0 8px 32px rgba(0,0,0,0.60)",
+            }}
           >
-            {toast.type === "success" ? (
-              <CheckCircle size={18} className="text-primary-fixed shrink-0" />
-            ) : toast.type === "error" ? (
-              <AlertCircle size={18} className="text-error shrink-0" />
-            ) : (
-              <div className="w-4 h-4 rounded-full bg-outline shrink-0" />
-            )}
-            <p className="font-body-sm text-body-sm flex-1">{toast.message}</p>
+            {toast.type === "success" && <CheckCircle size={16} style={{ color: "#bef532", flexShrink: 0 }} />}
+            {toast.type === "error"   && <AlertCircle size={16} style={{ color: "#ff6b6b", flexShrink: 0 }} />}
+            {toast.type === "info"    && <Info         size={16} style={{ color: "#808080", flexShrink: 0 }} />}
+
+            <p className="font-body-sm text-body-sm flex-1 text-white">{toast.message}</p>
+
             <button
               onClick={() => dismiss(toast.id)}
-              className="text-outline hover:text-on-surface transition-colors shrink-0"
+              className="shrink-0 transition-colors"
+              style={{ color: "#808080" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#ffffff"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#808080"; }}
               aria-label="Dismiss notification"
             >
-              <X size={14} />
+              <X size={13} />
             </button>
           </div>
         ))}

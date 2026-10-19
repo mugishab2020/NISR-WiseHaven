@@ -19,30 +19,43 @@ export default function EmptyState({
   onAction,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center text-center justify-center py-16 px-8 gap-4">
-      <div className="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-outline">
-        <Icon size={28} />
+    <div
+      className="flex flex-col items-center text-center justify-center py-14 px-8 gap-5 rounded-xl"
+      style={{ background: "transparent", border: "1px dashed #303030" }}
+    >
+      {/* Icon container */}
+      <div
+        className="w-14 h-14 rounded-full flex items-center justify-center"
+        style={{ background: "#171717", border: "1px solid #242424" }}
+      >
+        <Icon size={24} style={{ color: "#808080" }} />
       </div>
-      <div className="flex flex-col gap-1 max-w-xs">
-        <h3 className="font-headline-sm text-headline-sm text-primary font-semibold">
+
+      {/* Copy */}
+      <div className="flex flex-col gap-1.5 max-w-xs">
+        <h3 className="font-geist font-semibold text-[18px] text-white">
           {title}
         </h3>
-        <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+        <p className="font-body-sm text-body-sm leading-relaxed" style={{ color: "#b5b5b5" }}>
           {description}
         </p>
       </div>
+
+      {/* Action */}
       {actionLabel && (
         actionHref ? (
           <Link
             href={actionHref}
-            className="mt-2 px-4 py-2.5 rounded bg-primary-container text-on-primary font-body-md text-body-md font-semibold hover:opacity-90 transition-opacity"
+            className="mt-1 px-5 py-2.5 rounded-lg font-body-sm text-body-sm font-semibold transition-opacity hover:opacity-90 active:scale-[0.98]"
+            style={{ background: "#bef532", color: "#000000" }}
           >
             {actionLabel}
           </Link>
         ) : (
           <button
             onClick={onAction}
-            className="mt-2 px-4 py-2.5 rounded bg-primary-container text-on-primary font-body-md text-body-md font-semibold hover:opacity-90 transition-opacity"
+            className="mt-1 px-5 py-2.5 rounded-lg font-body-sm text-body-sm font-semibold transition-opacity hover:opacity-90 active:scale-[0.98]"
+            style={{ background: "#bef532", color: "#000000" }}
           >
             {actionLabel}
           </button>
