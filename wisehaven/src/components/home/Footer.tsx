@@ -184,6 +184,7 @@ export default function Footer() {
             <p
               className="text-[#252525] text-[11px]"
               style={{ fontFamily: "JetBrains Mono, monospace" }}
+              suppressHydrationWarning
             >
               © {year} WiseHaven · NISR Rwanda · MIT License
             </p>

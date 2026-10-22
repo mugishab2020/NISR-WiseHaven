@@ -73,18 +73,6 @@ export default function HeroSection() {
           className="flex flex-col justify-center flex-1 py-16 lg:py-0"
           style={{ maxWidth: "520px", zIndex: 2 }}
         >
-          {/* Eyebrow */}
-          <div
-            className="flex items-center gap-2.5 mb-7"
-            style={{ color: "#bef532", fontSize: "10px", fontWeight: 750, letterSpacing: "2.4px" }}
-          >
-            <span
-              className="w-[7px] h-[7px] rounded-full shrink-0"
-              style={{ background: "#bef532", boxShadow: "0 0 14px rgba(190,245,50,0.60)" }}
-            />
-            SMART ENVELOPE WALLET · BUILT FOR RWANDA
-          </div>
-
           {/* Headline */}
           <h1
             id="wh-headline"
@@ -168,12 +156,21 @@ export default function HeroSection() {
           }}
           aria-hidden="true"
         >
-          {/* Video container — rounded, slight border, visible */}
+          {/* Video container — borderless, slow-grow animation */}
+          <style>{`
+            @keyframes wh-video-grow {
+              0%   { transform: scale(1);    }
+              50%  { transform: scale(1.06); }
+              100% { transform: scale(1);    }
+            }
+            .wh-video-grow {
+              animation: wh-video-grow 8s ease-in-out infinite;
+            }
+          `}</style>
           <div
-            className="w-full h-full relative overflow-hidden"
+            className="w-full h-full relative overflow-hidden wh-video-grow"
             style={{
               borderRadius: "16px",
-              border: "1px solid rgba(255,255,255,0.10)",
               boxShadow: "0 0 80px rgba(190,245,50,0.06), 0 32px 64px rgba(0,0,0,0.60)",
             }}
           >
@@ -222,16 +219,36 @@ export default function HeroSection() {
         </div>
       </section>
 
-      {/* ── Bottom tagline bar ─────────────────────────────── */}
+      {/* ── Bottom tagline marquee ─────────────────────────── */}
       <div
-        className="flex items-center justify-center flex-wrap gap-4 px-6 py-5"
-        style={{ borderTop: "1px solid rgba(255,255,255,0.06)", color: "#555", fontSize: "9px", letterSpacing: "1.8px" }}
+        style={{
+          borderTop: "1px solid rgba(255,255,255,0.06)",
+          overflow: "hidden",
+          whiteSpace: "nowrap",
+          position: "relative",
+        }}
       >
-        <span>PLAN WITH INTENTION</span>
-        <span style={{ width: "28px", height: "1px", background: "#2a2a2a", display: "inline-block", verticalAlign: "middle" }} />
-        <span>SPEND WITH CLARITY</span>
-        <span style={{ width: "28px", height: "1px", background: "#2a2a2a", display: "inline-block", verticalAlign: "middle" }} />
-        <span>BUILD YOUR HAVEN</span>
+        <style>{`
+          @keyframes wh-marquee {
+            0%   { transform: translateX(100vw); opacity: 1; }
+            85%  { opacity: 1; }
+            100% { transform: translateX(-100%); opacity: 0; }
+          }
+          .wh-marquee-track {
+            display: inline-flex;
+            align-items: center;
+            animation: wh-marquee 20s linear infinite;
+          }
+        `}</style>
+        <div className="wh-marquee-track" style={{ color: "#555", fontSize: "9px", letterSpacing: "1.8px", padding: "20px 0" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "0" }}>
+            <span>PLAN WITH INTENTION</span>
+            <span style={{ width: "28px", height: "1px", background: "#2a2a2a", display: "inline-block", margin: "0 20px" }} />
+            <span>SPEND WITH CLARITY</span>
+            <span style={{ width: "28px", height: "1px", background: "#2a2a2a", display: "inline-block", margin: "0 20px" }} />
+            <span>BUILD YOUR HAVEN</span>
+          </span>
+        </div>
       </div>
     </div>
   );
