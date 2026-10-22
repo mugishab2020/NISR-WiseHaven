@@ -7,35 +7,35 @@ import EmptyState from "@/components/ui/EmptyState";
 import { formatRWF } from "@/lib/currency";
 import { formatActivityDate } from "@/lib/dates";
 import type { TransactionType } from "@/types";
-import {
-  ArrowDownRight, Shield, Lock, CheckCircle, Receipt, Search
-} from "lucide-react";
+import { ArrowDownRight, Shield, Lock, CheckCircle, Receipt, Search } from "lucide-react";
 
 const TYPE_FILTERS: { label: string; value: TransactionType | "all" }[] = [
-  { label: "All", value: "all" },
-  { label: "Deposits", value: "deposit" },
-  { label: "Vault", value: "vault_sweep" },
-  { label: "Allocations", value: "envelope_allocation" },
-  { label: "Payments", value: "envelope_payment" },
+  { label: "All",         value: "all"                  },
+  { label: "Deposits",    value: "deposit"               },
+  { label: "Vault",       value: "vault_sweep"           },
+  { label: "Locked",      value: "envelope_allocation"   },
+  { label: "Payments",    value: "envelope_payment"      },
 ];
 
 const TX_ICONS: Record<TransactionType, typeof Receipt> = {
-  deposit: ArrowDownRight,
-  vault_sweep: Shield,
-  envelope_allocation: Lock,
-  envelope_payment: CheckCircle,
-  envelope_cancelled: Receipt,
-  vault_withdrawal: ArrowDownRight,
+  deposit:              ArrowDownRight,
+  vault_sweep:          Shield,
+  envelope_allocation:  Lock,
+  envelope_payment:     CheckCircle,
+  envelope_cancelled:   Receipt,
+  vault_withdrawal:     ArrowDownRight,
 };
 
 const TX_LABELS: Record<TransactionType, string> = {
-  deposit: "Deposit",
-  vault_sweep: "Vault Sweep",
-  envelope_allocation: "Envelope Locked",
-  envelope_payment: "Simulated Payment",
-  envelope_cancelled: "Cancelled",
-  vault_withdrawal: "Vault Withdrawal",
+  deposit:             "Deposit",
+  vault_sweep:         "Vault Sweep",
+  envelope_allocation: "Locked",
+  envelope_payment:    "Simulated Payment",
+  envelope_cancelled:  "Cancelled",
+  vault_withdrawal:    "Vault Withdrawal",
 };
+
+const CARD: React.CSSProperties = { background: "#171717", border: "1px solid #242424", borderRadius: "12px" };
 
 export default function ActivityPage() {
   const { account, privacyMode } = useApp();
@@ -43,90 +43,90 @@ export default function ActivityPage() {
   const [search, setSearch] = useState("");
 
   const filtered = account.transactions.filter((tx) => {
-    const matchType = filter === "all" || tx.type === filter;
-    const matchSearch =
-      !search ||
-      tx.description.toLowerCase().includes(search.toLowerCase()) ||
-      tx.subDescription.toLowerCase().includes(search.toLowerCase());
+    const matchType   = filter === "all" || tx.type === filter;
+    const matchSearch = !search
+      || tx.description.toLowerCase().includes(search.toLowerCase())
+      || tx.subDescription.toLowerCase().includes(search.toLowerCase());
     return matchType && matchSearch;
   });
 
-  const totalIn = account.transactions
-    .filter((tx) => tx.direction === "in")
-    .reduce((sum, tx) => sum + tx.amount, 0);
-  const totalOut = account.transactions
-    .filter((tx) => tx.direction === "out")
-    .reduce((sum, tx) => sum + tx.amount, 0);
+  const totalIn  = account.transactions.filter((t) => t.direction === "in").reduce((s, t) => s + t.amount, 0);
+  const totalOut = account.transactions.filter((t) => t.direction === "out").reduce((s, t) => s + t.amount, 0);
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-6 pb-6">
-        {/* Header */}
+      <div className="flex flex-col gap-5 pb-6">
+
+        {/* ── Header ─────────────────────────────────────── */}
         <div className="pt-1">
-          <div className="flex items-center gap-2 mb-1">
-            <Receipt size={14} className="text-outline" />
-            <span className="font-label-sm text-label-sm uppercase tracking-widest text-outline">
+          <div className="flex items-center gap-2 mb-2">
+            <Receipt size={13} style={{ color: "#808080" }} />
+            <span className="font-label-sm text-label-sm uppercase tracking-[0.18em]" style={{ color: "#808080" }}>
               Audit Log
             </span>
           </div>
-          <h1 className="font-geist font-semibold text-headline-xl-mobile lg:text-headline-xl text-primary tracking-tight">
+          <h1 className="font-geist font-semibold text-[28px] lg:text-[40px] text-white tracking-tight leading-none">
             Activity History
           </h1>
-          <p className="font-body-md text-body-md text-secondary mt-1">
-            A full record of all simulated transactions in your WiseHaven demo.
+          <p className="font-body-md text-body-md mt-1.5" style={{ color: "#b5b5b5" }}>
+            Full record of all simulated transactions in your WiseHaven demo.
           </p>
         </div>
 
-        {/* Summary metrics */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-          <div className="p-4 rounded bg-surface-container-low border border-surface-container flex flex-col gap-1.5">
-            <span className="font-label-sm text-label-sm text-outline uppercase">Total Records</span>
-            <span className="font-mono font-bold text-headline-sm text-primary">
-              {account.transactions.length}
-            </span>
-          </div>
-          <div className="p-4 rounded bg-surface-container-low border border-surface-container flex flex-col gap-1.5">
-            <span className="font-label-sm text-label-sm text-outline uppercase">Total Deposited</span>
-            <span className="font-mono font-bold text-headline-sm text-primary-fixed">
-              {privacyMode ? "••••••" : `+${formatRWF(totalIn)}`} RWF
-            </span>
-          </div>
-          <div className="p-4 rounded bg-surface-container-low border border-surface-container flex flex-col gap-1.5 col-span-2 lg:col-span-1">
-            <span className="font-label-sm text-label-sm text-outline uppercase">Total Allocated</span>
-            <span className="font-mono font-bold text-headline-sm text-on-surface-variant">
-              {privacyMode ? "••••••" : `-${formatRWF(totalOut)}`} RWF
-            </span>
-          </div>
+        {/* ── Summary metrics ─────────────────────────────── */}
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: "Total Records",   value: account.transactions.length.toString(), mono: false, color: "#ffffff" },
+            { label: "Total Deposited", value: privacyMode ? "••••••" : `+${formatRWF(totalIn)} RWF`,  mono: true,  color: "#bef532" },
+            { label: "Total Allocated", value: privacyMode ? "••••••" : `-${formatRWF(totalOut)} RWF`, mono: true,  color: "#b5b5b5" },
+          ].map(({ label, value, mono, color }) => (
+            <div key={label} className="p-4 rounded-xl flex flex-col gap-2" style={CARD}>
+              <span className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>{label}</span>
+              <span className={`font-bold text-[18px] ${mono ? "font-mono" : "font-geist"}`} style={{ color }}>
+                {value}
+              </span>
+            </div>
+          ))}
         </div>
 
-        {/* Search + filter */}
-        <div className="flex flex-col gap-3 bg-surface-container-low border border-surface-container rounded p-4">
+        {/* ── Search + filter ──────────────────────────────── */}
+        <div className="flex flex-col gap-3 p-4 rounded-xl" style={CARD}>
           <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-outline" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "#808080" }} />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-10 pl-9 pr-4 rounded bg-surface-container text-primary placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:ring-1 focus:ring-primary-fixed"
+              className="w-full h-10 pl-9 pr-4 rounded-lg font-body-sm text-body-sm text-white placeholder:text-[#808080] focus:outline-none transition-all"
+              style={{ background: "#0d0d0d", border: "1px solid #303030" }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "#bef532"; e.currentTarget.style.boxShadow = "0 0 0 1px #bef532"; }}
+              onBlur={(e)  => { e.currentTarget.style.borderColor = "#303030"; e.currentTarget.style.boxShadow = "none"; }}
               placeholder="Search activity…"
-              type="text"
               aria-label="Search activity"
             />
           </div>
           <div className="flex items-center gap-2 overflow-x-auto pb-0.5">
-            {TYPE_FILTERS.map((f) => (
-              <button
-                key={f.value}
-                onClick={() => setFilter(f.value)}
-                className={`px-3 py-1.5 rounded-full font-label-md text-label-md font-semibold transition-all whitespace-nowrap ${filter === f.value ? "bg-primary-container text-on-primary" : "bg-surface-container hover:bg-surface-container-high text-secondary"}`}
-                aria-pressed={filter === f.value}
-              >
-                {f.label}
-              </button>
-            ))}
+            {TYPE_FILTERS.map((f) => {
+              const active = filter === f.value;
+              return (
+                <button
+                  key={f.value}
+                  onClick={() => setFilter(f.value)}
+                  className="px-3 py-1.5 rounded-full font-label-sm text-label-sm font-medium whitespace-nowrap transition-all"
+                  style={
+                    active
+                      ? { background: "#bef532", color: "#000000" }
+                      : { background: "#202020", color: "#808080", border: "1px solid #303030" }
+                  }
+                  aria-pressed={active}
+                >
+                  {f.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Transaction list */}
+        {/* ── Transaction list ─────────────────────────────── */}
         {filtered.length === 0 ? (
           <EmptyState
             icon={Receipt}
@@ -134,54 +134,67 @@ export default function ActivityPage() {
             description={search ? "Try a different search term." : "No transactions match this filter."}
           />
         ) : (
-          <div className="rounded-xl bg-surface-container-low border border-surface-container overflow-hidden">
-            <div className="flex flex-col divide-y divide-surface-container">
-              {filtered.map((tx) => {
-                const Icon = TX_ICONS[tx.type] ?? Receipt;
-                return (
-                  <div
-                    key={tx.id}
-                    className="flex items-center justify-between gap-4 px-4 py-4 hover:bg-surface-container transition-colors"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className={`w-10 h-10 rounded flex items-center justify-center shrink-0 ${tx.direction === "in" ? "bg-primary-container/15 text-primary-fixed" : "bg-surface-container-high text-on-surface-variant"}`}>
-                        <Icon size={18} />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-body-md text-body-md font-medium text-primary truncate">
-                          {tx.description}
-                        </p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className={`font-label-sm text-label-sm px-1.5 py-0.5 rounded-full font-medium ${tx.type === "deposit" ? "bg-primary-container/10 text-primary-fixed" : "bg-surface-container-high text-outline"}`}>
-                            {TX_LABELS[tx.type]}
-                          </span>
-                          <span className="font-body-sm text-body-sm text-outline truncate">
-                            {formatActivityDate(tx.timestamp)}
-                          </span>
-                        </div>
-                        {tx.subDescription && (
-                          <p className="font-body-sm text-body-sm text-outline truncate mt-0.5">
-                            {tx.subDescription}
-                          </p>
-                        )}
-                      </div>
+          <div className="rounded-xl overflow-hidden" style={{ background: "#171717", border: "1px solid #242424" }}>
+            {filtered.map((tx, i) => {
+              const Icon = TX_ICONS[tx.type] ?? Receipt;
+              return (
+                <div
+                  key={tx.id}
+                  className="flex items-center justify-between gap-4 px-4 py-4 transition-colors"
+                  style={{
+                    borderBottom: i < filtered.length - 1 ? "1px solid #1a1a1a" : "none",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#1d1d1d"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                      style={{
+                        background: tx.direction === "in" ? "rgba(190,245,50,0.08)" : "#202020",
+                        color: tx.direction === "in" ? "#bef532" : "#808080",
+                      }}
+                    >
+                      <Icon size={16} />
                     </div>
-
-                    <div className="flex flex-col items-end shrink-0">
-                      <span className={`font-label-lg text-label-lg font-semibold font-mono ${tx.direction === "in" ? "text-primary-fixed" : "text-on-surface-variant"}`}>
-                        {tx.direction === "in" ? "+" : tx.direction === "out" ? "-" : ""}
-                        {privacyMode ? "••••••" : formatRWF(tx.amount)}
-                      </span>
-                      <span className="font-label-sm text-label-sm text-outline">RWF</span>
+                    <div className="min-w-0">
+                      <p className="font-body-md text-body-md font-medium text-white truncate">{tx.description}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span
+                          className="font-label-sm text-label-sm px-1.5 py-0.5 rounded font-medium"
+                          style={{
+                            background: tx.type === "deposit" ? "rgba(190,245,50,0.08)" : "#202020",
+                            color: tx.type === "deposit" ? "#bef532" : "#808080",
+                          }}
+                        >
+                          {TX_LABELS[tx.type]}
+                        </span>
+                        <span className="font-body-sm text-body-sm truncate" style={{ color: "#808080" }}>
+                          {formatActivityDate(tx.timestamp)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                  <div className="flex flex-col items-end shrink-0">
+                    <span
+                      className="font-mono font-semibold text-[13px]"
+                      style={{
+                        color: tx.direction === "in" ? "#bef532" : "#b5b5b5",
+                        fontFeatureSettings: '"tnum" 1',
+                      }}
+                    >
+                      {tx.direction === "in" ? "+" : tx.direction === "out" ? "−" : ""}
+                      {privacyMode ? "••••••" : formatRWF(tx.amount)}
+                    </span>
+                    <span className="font-label-sm text-label-sm" style={{ color: "#808080" }}>RWF</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
 
-        <p className="font-body-sm text-body-sm text-outline text-center">
+        <p className="font-body-sm text-body-sm text-center" style={{ color: "#808080" }}>
           ⚠ All transactions are simulated demo data. No real money is involved.
         </p>
       </div>

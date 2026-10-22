@@ -19,8 +19,8 @@ export default function ConfirmDialog({
   title,
   description,
   confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
-  variant = "default",
+  cancelLabel  = "Cancel",
+  variant      = "default",
   onConfirm,
   onCancel,
   children,
@@ -37,55 +37,80 @@ export default function ConfirmDialog({
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0"
+        style={{ background: "rgba(0,0,0,0.80)", backdropFilter: "blur(8px)" }}
         onClick={onCancel}
         aria-hidden="true"
       />
 
       {/* Panel */}
-      <div className="relative w-full max-w-md bg-surface-container-low rounded-xl border border-surface-container-high shadow-2xl p-space-md flex flex-col gap-space-md">
+      <div
+        className="relative w-full max-w-md flex flex-col gap-5 p-5"
+        style={{
+          background: "#171717",
+          border: "1px solid #303030",
+          borderRadius: "16px",
+          boxShadow: "0 20px 40px rgba(0,0,0,0.80)",
+        }}
+      >
+        {/* Header */}
         <div className="flex items-start gap-3">
           {variant === "destructive" && (
-            <div className="w-10 h-10 rounded bg-error-container/20 flex items-center justify-center shrink-0">
-              <AlertTriangle size={20} className="text-error" />
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: "rgba(255,68,68,0.10)" }}
+            >
+              <AlertTriangle size={18} style={{ color: "#ff6b6b" }} />
             </div>
           )}
           <div className="flex flex-col gap-1">
             <h2
               id="dialog-title"
-              className="font-headline-sm text-headline-sm text-primary font-semibold"
+              className="font-geist font-semibold text-[18px] text-white leading-tight"
             >
               {title}
             </h2>
             <p
               id="dialog-desc"
-              className="font-body-sm text-body-sm text-on-surface-variant"
+              className="font-body-sm text-body-sm leading-relaxed"
+              style={{ color: "#b5b5b5" }}
             >
               {description}
             </p>
           </div>
         </div>
 
+        {/* Optional children (summary details) */}
         {children && (
-          <div className="rounded bg-surface-container p-space-sm">
+          <div
+            className="rounded-xl p-3"
+            style={{ background: "#0d0d0d", border: "1px solid #242424" }}
+          >
             {children}
           </div>
         )}
 
-        <div className="flex items-center gap-space-sm justify-end">
+        {/* Actions */}
+        <div className="flex items-center gap-3 justify-end">
           <button
             onClick={onCancel}
-            className="px-4 py-2.5 rounded bg-surface-container text-on-surface font-body-md text-body-md hover:bg-surface-container-high border border-surface-container-high transition-colors"
+            className="px-4 py-2.5 rounded-lg font-body-sm text-body-sm font-medium transition-colors"
+            style={{ background: "#202020", color: "#b5b5b5", border: "1px solid #303030" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#ffffff"; (e.currentTarget as HTMLElement).style.borderColor = "#404040"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#b5b5b5"; (e.currentTarget as HTMLElement).style.borderColor = "#303030"; }}
           >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
-            className={
+            className="px-4 py-2.5 rounded-lg font-body-sm text-body-sm font-semibold transition-all active:scale-[0.98]"
+            style={
               variant === "destructive"
-                ? "px-4 py-2.5 rounded bg-error-container/20 text-error font-body-md text-body-md font-semibold hover:bg-error-container/30 border border-error/20 transition-all"
-                : "px-4 py-2.5 rounded bg-primary-container text-on-primary font-body-md text-body-md font-semibold hover:opacity-90 transition-opacity"
+                ? { background: "rgba(255,68,68,0.12)", color: "#ff6b6b", border: "1px solid rgba(255,68,68,0.30)" }
+                : { background: "#bef532", color: "#000000" }
             }
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.88"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
           >
             {confirmLabel}
           </button>

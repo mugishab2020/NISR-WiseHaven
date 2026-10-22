@@ -11,28 +11,28 @@ import { formatRWF } from "@/lib/currency";
 import { formatCountdown, formatDate, calcElapsedFraction, formatActivityDate } from "@/lib/dates";
 import {
   ChevronLeft, Lock, CheckCircle, AlertCircle,
-  Home, ShoppingBasket, Zap, School, Truck, Heart, Users, Briefcase
+  Home, ShoppingBasket, Zap, School, Truck, Heart, Users, Briefcase,
 } from "lucide-react";
 
 const ICON_MAP: Record<string, typeof Lock> = {
-  home_work: Home,
-  shopping_basket: ShoppingBasket,
-  bolt: Zap,
-  school: School,
-  truck: Truck,
-  heart: Heart,
-  users: Users,
-  briefcase: Briefcase,
+  home_work: Home, shopping_basket: ShoppingBasket, bolt: Zap,
+  school: School, truck: Truck, heart: Heart, users: Users, briefcase: Briefcase,
+};
+
+const CARD: React.CSSProperties = {
+  background: "#171717",
+  border: "1px solid #242424",
+  borderRadius: "12px",
 };
 
 export default function EnvelopeDetailPage() {
-  const params = useParams<{ id: string }>();
-  const router = useRouter();
+  const params   = useParams<{ id: string }>();
+  const router   = useRouter();
   const { account, doConfirmPayment, privacyMode } = useApp();
 
   const [showConfirm, setShowConfirm] = useState(false);
-  const [paid, setPaid] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [paid, setPaid]               = useState(false);
+  const [error, setError]             = useState<string | null>(null);
 
   const envelope = account.envelopes.find((e) => e.id === params.id);
 
@@ -40,11 +40,12 @@ export default function EnvelopeDetailPage() {
     return (
       <AppShell>
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <AlertCircle size={40} className="text-outline" />
-          <h2 className="font-geist font-semibold text-headline-sm text-primary">Envelope not found</h2>
+          <AlertCircle size={40} style={{ color: "#808080" }} />
+          <h2 className="font-geist font-semibold text-[18px] text-white">Envelope not found</h2>
           <button
             onClick={() => router.push("/envelopes")}
-            className="px-4 py-2.5 rounded bg-surface-container text-on-surface font-body-md hover:bg-surface-container-high transition-colors"
+            className="px-4 py-2.5 rounded-lg font-body-md text-body-md transition-colors"
+            style={{ background: "#202020", color: "#b5b5b5", border: "1px solid #303030" }}
           >
             Back to Envelopes
           </button>
@@ -53,14 +54,17 @@ export default function EnvelopeDetailPage() {
     );
   }
 
-  const Icon = ICON_MAP[envelope.icon] ?? Lock;
-  const elapsed = calcElapsedFraction(envelope.createdAt, envelope.maturityDate);
+  const Icon      = ICON_MAP[envelope.icon] ?? Lock;
+  const elapsed   = calcElapsedFraction(envelope.createdAt, envelope.maturityDate);
   const countdown = formatCountdown(envelope.maturityDate);
-  const isPaid = envelope.status === "paid";
+  const isPaid    = envelope.status === "paid";
+  const isUnlocking = envelope.status === "unlocking_soon";
+  const isReady   = envelope.status === "ready_to_pay";
+  const relatedTx = account.transactions.filter((tx) => tx.envelopeId === envelope.id);
 
-  const relatedTx = account.transactions.filter(
-    (tx) => tx.envelopeId === envelope.id
-  );
+  const accent  = isUnlocking ? "#ffb800" : "#bef532";
+  const heroBg  = isUnlocking ? "rgba(255,184,0,0.02)" : isReady ? "rgba(190,245,50,0.02)" : "#171717";
+  const heroBorder = isUnlocking ? "rgba(255,184,0,0.30)" : isReady ? "rgba(190,245,50,0.25)" : "#242424";
 
   function handleConfirmPayment() {
     try {
@@ -77,21 +81,25 @@ export default function EnvelopeDetailPage() {
     return (
       <AppShell>
         <div className="flex flex-col items-center justify-center py-20 gap-5">
-          <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center">
-            <CheckCircle size={28} className="text-on-primary" />
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{ background: "#bef532" }}
+          >
+            <CheckCircle size={28} style={{ color: "#000000" }} />
           </div>
           <div className="text-center">
-            <h2 className="font-geist font-semibold text-headline-sm text-primary">Payment Confirmed!</h2>
-            <p className="font-body-md text-body-md text-on-surface-variant mt-1">
+            <h2 className="font-geist font-semibold text-[20px] text-white">Payment Confirmed!</h2>
+            <p className="font-body-md text-body-md mt-1" style={{ color: "#b5b5b5" }}>
               Demo payment of {formatRWF(envelope.amount)} RWF recorded.
             </p>
-            <p className="font-body-sm text-body-sm text-outline mt-1">
+            <p className="font-body-sm text-body-sm mt-1" style={{ color: "#808080" }}>
               ⚠ This is a simulated payment. No real money was transferred.
             </p>
           </div>
           <button
             onClick={() => router.push("/envelopes")}
-            className="px-4 py-2.5 rounded bg-primary-container text-on-primary font-body-md font-semibold hover:opacity-90"
+            className="px-5 py-3 rounded-lg font-body-md text-body-md font-semibold hover:opacity-90"
+            style={{ background: "#bef532", color: "#000000" }}
           >
             Back to Envelopes
           </button>
@@ -106,33 +114,45 @@ export default function EnvelopeDetailPage() {
         {/* Back */}
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-1.5 text-outline hover:text-on-surface font-body-sm text-body-sm transition-colors mb-5"
+          className="flex items-center gap-1.5 font-body-sm text-body-sm mb-5 transition-colors"
+          style={{ color: "#808080" }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#ffffff"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#808080"; }}
         >
           <ChevronLeft size={16} />
           Back to Envelopes
         </button>
 
-        {/* Hero card */}
-        <div className={`relative rounded-xl p-5 overflow-hidden border mb-5 ${envelope.status === "unlocking_soon" || envelope.status === "ready_to_pay" ? "bg-surface-container-high border-primary-fixed/30" : "bg-surface-container-low border-surface-container"}`}>
-          {(envelope.status === "unlocking_soon" || envelope.status === "ready_to_pay") && (
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary-fixed" />
+        {/* ── Hero card ─────────────────────────────────── */}
+        <div
+          className="relative p-5 rounded-xl overflow-hidden mb-4"
+          style={{ background: heroBg, border: `1px solid ${heroBorder}` }}
+        >
+          {/* Top accent bar */}
+          {(isUnlocking || isReady) && (
+            <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: accent }} />
           )}
-          <div className="absolute -right-8 -bottom-8 text-surface-container-highest/20 pointer-events-none">
-            <Icon size={100} />
+          {/* Ghost icon */}
+          <div className="absolute -right-5 -bottom-5 pointer-events-none" style={{ color: "#242424" }}>
+            <Icon size={96} />
           </div>
 
           <div className="relative z-10 flex flex-col gap-4">
-            {/* Header */}
+            {/* Header row */}
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded flex items-center justify-center ${envelope.status === "unlocking_soon" || envelope.status === "ready_to_pay" ? "bg-primary-container text-on-primary" : "bg-surface-container-highest text-primary-fixed"}`}>
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{
+                    background: (isUnlocking || isReady) ? `rgba(${isUnlocking ? "255,184,0" : "190,245,50"},0.12)` : "#202020",
+                    color: (isUnlocking || isReady) ? accent : "#808080",
+                  }}
+                >
                   <Icon size={22} />
                 </div>
                 <div>
-                  <h1 className="font-geist font-semibold text-headline-sm text-primary">
-                    {envelope.name}
-                  </h1>
-                  <p className="font-label-sm text-label-sm text-outline mt-0.5">
+                  <h1 className="font-geist font-semibold text-[20px] text-white">{envelope.name}</h1>
+                  <p className="font-label-sm text-label-sm mt-0.5" style={{ color: "#808080" }}>
                     {envelope.categoryLabel}
                   </p>
                 </div>
@@ -142,153 +162,185 @@ export default function EnvelopeDetailPage() {
 
             {/* Amount */}
             <div>
-              <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">
+              <span className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>
                 Secured Capital
               </span>
               <div className="mt-1">
-                <CurrencyDisplay amount={envelope.amount} size="lg" className={envelope.status === "ready_to_pay" ? "text-primary-fixed" : undefined} />
+                <CurrencyDisplay amount={envelope.amount} size="lg" />
               </div>
             </div>
 
-            {/* Progress */}
+            {/* Lock progress */}
             {!isPaid && (
               <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between font-label-sm text-label-sm">
-                  <span className="text-outline font-mono">Lock Progress</span>
-                  <span className={`font-mono font-bold ${envelope.status === "unlocking_soon" || envelope.status === "ready_to_pay" ? "text-primary-fixed" : "text-primary"}`}>
+                <div className="flex items-center justify-between">
+                  <span className="font-label-sm text-label-sm" style={{ color: "#808080" }}>Lock Progress</span>
+                  <span
+                    className="font-mono font-bold text-[13px] tracking-wider"
+                    style={{ color: accent, fontFeatureSettings: '"tnum" 1, "zero" 1' }}
+                  >
                     {countdown}
                   </span>
                 </div>
-                <div className="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden flex gap-0.5">
+                <div className="w-full h-[4px] rounded-full overflow-hidden" style={{ background: "#242424" }}>
                   <div
-                    className="h-full bg-primary-fixed rounded-l-full transition-all duration-500"
-                    style={{ width: `${Math.round(elapsed * 100)}%` }}
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{ width: `${Math.round(elapsed * 100)}%`, background: accent }}
                   />
-                  <div className="h-full bg-surface-variant flex-1" />
                 </div>
-                <div className="flex items-center justify-between font-label-sm text-label-sm text-outline">
-                  <span>Created {formatDate(envelope.createdAt)}</span>
-                  <span className="text-on-surface font-medium">{formatDate(envelope.maturityDate)}</span>
+                <div className="flex items-center justify-between font-label-sm text-label-sm font-mono" style={{ color: "#808080" }}>
+                  <span>{formatDate(envelope.createdAt)}</span>
+                  <span className="text-white">{formatDate(envelope.maturityDate)}</span>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Details */}
-        <div className="rounded-xl bg-surface-container-low border border-surface-container p-4 flex flex-col gap-3 mb-5">
-          <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">
+        {/* ── Details ───────────────────────────────────── */}
+        <div className="p-4 rounded-xl flex flex-col gap-3 mb-4" style={CARD}>
+          <span className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>
             Envelope Details
           </span>
-          <div className="flex flex-col divide-y divide-surface-container">
-            {[
-              { label: "Recipient", value: envelope.recipient },
-              { label: "Maturity Date", value: formatDate(envelope.maturityDate) },
-              { label: "Created", value: formatDate(envelope.createdAt) },
-              { label: "Category", value: envelope.categoryLabel },
-              ...(envelope.description ? [{ label: "Notes", value: envelope.description }] : []),
-              ...(envelope.paidAt ? [{ label: "Paid At", value: formatDate(envelope.paidAt) }] : []),
-            ].map(({ label, value }) => (
-              <div key={label} className="py-2.5 flex items-start justify-between gap-3">
-                <span className="font-label-sm text-label-sm text-outline whitespace-nowrap">{label}</span>
-                <span className="font-body-sm text-body-sm text-on-surface font-medium text-right">{value}</span>
+          {[
+            { label: "Recipient",     value: envelope.recipient },
+            { label: "Maturity Date", value: formatDate(envelope.maturityDate) },
+            { label: "Created",       value: formatDate(envelope.createdAt) },
+            { label: "Category",      value: envelope.categoryLabel },
+            ...(envelope.description ? [{ label: "Notes", value: envelope.description }] : []),
+            ...(envelope.paidAt ? [{ label: "Paid At", value: formatDate(envelope.paidAt) }] : []),
+          ].map(({ label, value }, i, arr) => (
+            <div
+              key={label}
+              className="py-2.5 flex items-start justify-between gap-3"
+              style={{ borderBottom: i < arr.length - 1 ? "1px solid #1a1a1a" : "none" }}
+            >
+              <span className="font-label-sm text-label-sm" style={{ color: "#808080" }}>{label}</span>
+              <span className="font-body-sm text-body-sm font-medium text-white text-right">{value}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Activity ──────────────────────────────────── */}
+        {relatedTx.length > 0 && (
+          <div className="p-4 rounded-xl flex flex-col gap-3 mb-4" style={CARD}>
+            <span className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>
+              Activity
+            </span>
+            {relatedTx.map((tx, i) => (
+              <div
+                key={tx.id}
+                className="flex items-center justify-between gap-3 py-2"
+                style={{ borderBottom: i < relatedTx.length - 1 ? "1px solid #1a1a1a" : "none" }}
+              >
+                <div>
+                  <p className="font-body-sm text-body-sm font-medium text-white">{tx.description}</p>
+                  <p className="font-label-sm text-label-sm" style={{ color: "#808080" }}>
+                    {formatActivityDate(tx.timestamp)}
+                  </p>
+                </div>
+                <span
+                  className="font-mono text-[12px] font-semibold whitespace-nowrap"
+                  style={{
+                    color: tx.direction === "in" ? "#bef532" : "#b5b5b5",
+                    fontFeatureSettings: '"tnum" 1',
+                  }}
+                >
+                  {tx.direction === "in" ? "+" : "−"}
+                  {privacyMode ? "••••••" : formatRWF(tx.amount)} RWF
+                </span>
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Activity */}
-        {relatedTx.length > 0 && (
-          <div className="rounded-xl bg-surface-container-low border border-surface-container p-4 flex flex-col gap-3 mb-5">
-            <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider">
-              Activity
-            </span>
-            <div className="flex flex-col gap-2">
-              {relatedTx.map((tx) => (
-                <div key={tx.id} className="flex items-center justify-between gap-3 py-2">
-                  <div>
-                    <p className="font-body-md text-body-md text-on-surface font-medium">{tx.description}</p>
-                    <p className="font-body-sm text-body-sm text-outline">{formatActivityDate(tx.timestamp)}</p>
-                  </div>
-                  <span className={`font-label-md text-label-md font-semibold font-mono ${tx.direction === "out" ? "text-on-surface-variant" : "text-primary-fixed"}`}>
-                    {tx.direction === "in" ? "+" : "-"}
-                    {privacyMode ? "••••••" : formatRWF(tx.amount)} RWF
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
         )}
 
-        {/* Error message */}
+        {/* ── Error ─────────────────────────────────────── */}
         {error && (
-          <div className="mb-4 p-3 rounded bg-error-container/20 border border-error/20 flex items-center gap-2">
-            <AlertCircle size={16} className="text-error" />
-            <p className="font-body-sm text-body-sm text-error">{error}</p>
+          <div
+            className="mb-4 p-3 rounded-lg flex items-center gap-2"
+            style={{ background: "rgba(255,68,68,0.08)", border: "1px solid rgba(255,68,68,0.20)" }}
+          >
+            <AlertCircle size={15} style={{ color: "#ff6b6b" }} />
+            <p className="font-body-sm text-body-sm" style={{ color: "#ff6b6b" }}>{error}</p>
           </div>
         )}
 
-        {/* Actions */}
+        {/* ── Action buttons ────────────────────────────── */}
         <div className="flex flex-col gap-3">
-          {envelope.status === "ready_to_pay" && !isPaid && (
+          {isReady && !isPaid && (
             <button
               onClick={() => setShowConfirm(true)}
-              className="w-full py-3.5 rounded bg-primary-container text-on-primary font-body-md text-body-md font-semibold hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-lg font-body-md text-body-md font-bold flex items-center justify-center gap-2 transition-opacity hover:opacity-90 active:scale-[0.98]"
+              style={{ background: "#bef532", color: "#000000" }}
             >
               <CheckCircle size={18} />
               Confirm Simulated Payment
             </button>
           )}
 
-          {envelope.status === "unlocking_soon" && (
-            <div className="w-full py-3 rounded border-2 border-primary-fixed/40 text-primary-fixed font-body-md text-body-md font-medium flex items-center justify-center gap-2 bg-primary-container/5">
+          {isUnlocking && (
+            <div
+              className="w-full py-3 rounded-lg font-body-md text-body-md font-semibold flex items-center justify-center gap-2"
+              style={{ background: "rgba(255,184,0,0.08)", color: "#ffb800", border: "1px solid rgba(255,184,0,0.25)" }}
+            >
               <Lock size={16} className="animate-pulse" />
               Unlocking Soon — {countdown}
             </div>
           )}
 
           {envelope.status === "locked" && (
-            <div className="w-full py-3 rounded bg-surface-container border border-surface-container-high text-on-surface-variant font-body-md text-body-md flex items-center justify-center gap-2">
+            <div
+              className="w-full py-3 rounded-lg font-body-md text-body-md flex items-center justify-center gap-2"
+              style={{ background: "#171717", color: "#808080", border: "1px solid #242424" }}
+            >
               <Lock size={16} />
               Locked until {formatDate(envelope.maturityDate)}
             </div>
           )}
 
           {isPaid && (
-            <div className="w-full py-3 rounded bg-surface-container border border-surface-container-high text-outline font-body-md text-body-md flex items-center justify-center gap-2">
+            <div
+              className="w-full py-3 rounded-lg font-body-md text-body-md flex items-center justify-center gap-2"
+              style={{ background: "#171717", color: "#808080", border: "1px solid #242424" }}
+            >
               <CheckCircle size={16} />
-              Payment Completed on {envelope.paidAt ? formatDate(envelope.paidAt) : "–"}
+              Payment Completed {envelope.paidAt ? formatDate(envelope.paidAt) : ""}
             </div>
           )}
 
           <button
             onClick={() => router.push("/envelopes")}
-            className="w-full py-2.5 rounded bg-surface-container text-on-surface font-body-md text-body-md hover:bg-surface-container-high border border-surface-container-high transition-colors"
+            className="w-full py-2.5 rounded-lg font-body-md text-body-md font-medium transition-colors"
+            style={{ background: "#171717", color: "#b5b5b5", border: "1px solid #242424" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#303030"; (e.currentTarget as HTMLElement).style.color = "#ffffff"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#242424"; (e.currentTarget as HTMLElement).style.color = "#b5b5b5"; }}
           >
             Back to Envelopes
           </button>
         </div>
 
-        {/* Confirm dialog */}
+        {/* ── Confirm dialog ────────────────────────────── */}
         <ConfirmDialog
           isOpen={showConfirm}
           title="Confirm Simulated Payment"
-          description={`This will simulate a payment of ${formatRWF(envelope.amount)} RWF to ${envelope.recipient}. This is demo money only — no real transfer occurs.`}
+          description={`This will simulate a payment of ${formatRWF(envelope.amount)} RWF to ${envelope.recipient}. Demo only — no real transfer occurs.`}
           confirmLabel="Confirm Payment"
           cancelLabel="Cancel"
           onConfirm={handleConfirmPayment}
           onCancel={() => setShowConfirm(false)}
         >
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             <div className="flex justify-between font-body-sm text-body-sm">
-              <span className="text-outline">Amount</span>
-              <span className="text-primary-fixed font-semibold font-mono">{formatRWF(envelope.amount)} RWF</span>
+              <span style={{ color: "#808080" }}>Amount</span>
+              <span className="font-mono font-semibold" style={{ color: "#bef532" }}>
+                {formatRWF(envelope.amount)} RWF
+              </span>
             </div>
             <div className="flex justify-between font-body-sm text-body-sm">
-              <span className="text-outline">To</span>
-              <span className="text-on-surface font-medium">{envelope.recipient}</span>
+              <span style={{ color: "#808080" }}>To</span>
+              <span className="font-medium text-white">{envelope.recipient}</span>
             </div>
-            <p className="font-label-sm text-label-sm text-outline mt-1">
+            <p className="font-label-sm text-label-sm mt-1" style={{ color: "#808080" }}>
               ⚠ Simulated demo payment only. No real money moves.
             </p>
           </div>
