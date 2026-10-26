@@ -35,8 +35,8 @@ export default function HeroSection() {
         <div className="hidden md:flex items-center gap-8">
           {[
             { label: "How it works",    id: "#how-it-works" },
-            { label: "Smart envelopes", id: "#features"     },
-            { label: "Emergency vault", id: "#features"     },
+            { label: "Smart envelopes", id: "#envelopes"    },
+            { label: "Emergency vault", id: "#vault"        },
           ].map(({ label, id }) => (
             <a
               key={label}

@@ -15,7 +15,7 @@ export default function EmergencyVaultFeature() {
   const progress = Math.round((vaultAmount / 100000) * 100);
 
   return (
-    <section className="py-24 bg-[#060606]" aria-labelledby="vault-heading">
+    <section id="vault" className="py-24 bg-[#060606]" aria-labelledby="vault-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
