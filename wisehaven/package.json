@@ -16,12 +16,14 @@
     "next": "14.2.29",
     "react": "^18",
     "react-dom": "^18",
-    "recharts": "^2.12.7"
+    "recharts": "^2.12.7",
+    "three": "^0.143.0"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/three": "^0.143.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.29",
     "postcss": "^8",

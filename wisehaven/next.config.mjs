@@ -1,7 +1,10 @@
 import withPWA from "@ducanh2912/next-pwa";
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  // three.js ships as ESM; Next.js webpack must transpile it
+  transpilePackages: ["three"],
+};
 
 export default withPWA({
   dest: "public",
