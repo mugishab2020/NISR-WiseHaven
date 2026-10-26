@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 const QUOTES = [
@@ -12,7 +12,6 @@ const QUOTES = [
 ];
 
 export default function HeroSection() {
-  const scrollHintRef = useRef<HTMLDivElement>(null);
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [visible, setVisible] = useState(true);
 
@@ -169,7 +168,7 @@ export default function HeroSection() {
                       }}
                       aria-hidden="true"
                     >
-                      "
+                      &ldquo;
                     </span>
                     <div>
                       <p
