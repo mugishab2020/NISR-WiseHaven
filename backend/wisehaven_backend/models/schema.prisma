@@ -1,0 +1,211 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider                    = "prisma-client-py"
+  interface                   = "asyncio"
+  enable_experimental_decimal = true
+}
+
+model User {
+  id                     String   @id  // Clerk user ID
+  clerk_id               String   @unique  // Clerk user ID (same as id for clarity)
+  email                  String?  @unique  // Optional, managed by Clerk
+  phone_number           String?  // Optional, managed by Clerk
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
+  first_sweep_percentage Float    @default(0.05)
+  preferred_notification String   @default("EMAIL")
+  emergency_contact      String?
+  is_active              Boolean  @default(true)
+
+  wallet                 Wallet?
+  envelopes              Envelope[]
+  allocation_plans       AllocationPlan[]
+  transactions           Transaction[]
+  payees                 Payee[]
+  emergency_withdrawals  EmergencyWithdrawalRequest[]
+
+  @@index([clerk_id])
+  @@index([email])
+  @@index([phone_number])
+}
+
+model Wallet {
+  id               String   @id @default(uuid())
+  user_id          String   @unique
+  balance          Decimal  @default(0) @db.Decimal(15, 2)
+  total_deposited  Decimal  @default(0) @db.Decimal(15, 2)
+  total_allocated  Decimal  @default(0) @db.Decimal(15, 2)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+  version          Int      @default(0)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+
+model Envelope {
+  id                 String   @id @default(uuid())
+  user_id            String
+  name               String
+  category           String
+  description        String?
+  balance            Decimal  @default(0) @db.Decimal(15, 2)
+  is_active          Boolean  @default(true)
+  is_emergency_vault Boolean  @default(false)
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  user               User                 @relation(fields: [user_id], references: [id])
+  temporal_lock      TemporalLock?
+  transactions       Transaction[]
+  payees             PayeeEnvelope[]
+  allocation_items   AllocationPlanItem[]
+
+  @@index([user_id, is_active])
+  @@index([user_id, is_emergency_vault])
+}
+
+model TemporalLock {
+  id                 String   @id @default(uuid())
+  envelope_id        String   @unique
+  maturity_timestamp DateTime
+  created_at         DateTime @default(now())
+  notified           Boolean  @default(false)
+
+  envelope Envelope @relation(fields: [envelope_id], references: [id])
+
+  @@index([maturity_timestamp, notified])
+}
+
+model AllocationPlan {
+  id         String   @id @default(uuid())
+  user_id    String
+  name       String
+  is_active  Boolean  @default(false)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user  User                 @relation(fields: [user_id], references: [id])
+  items AllocationPlanItem[]
+
+  @@index([user_id, is_active])
+}
+
+model AllocationPlanItem {
+  id                 String @id @default(uuid())
+  allocation_plan_id String
+  envelope_id        String
+  percentage         Float
+
+  allocation_plan AllocationPlan @relation(fields: [allocation_plan_id], references: [id], onDelete: Cascade)
+  envelope        Envelope       @relation(fields: [envelope_id], references: [id])
+
+  @@unique([allocation_plan_id, envelope_id])
+}
+
+model Payee {
+  id                 String   @id @default(uuid())
+  user_id            String
+  name               String
+  phone_number       String?
+  account_identifier String?
+  payee_type         String
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  user         User            @relation(fields: [user_id], references: [id])
+  envelopes    PayeeEnvelope[]
+  transactions Transaction[]
+
+  @@index([user_id])
+}
+
+model PayeeEnvelope {
+  id          String @id @default(uuid())
+  payee_id    String
+  envelope_id String
+
+  payee    Payee    @relation(fields: [payee_id], references: [id], onDelete: Cascade)
+  envelope Envelope @relation(fields: [envelope_id], references: [id], onDelete: Cascade)
+
+  @@unique([payee_id, envelope_id])
+}
+
+model Transaction {
+  id               String   @id @default(uuid())
+  user_id          String
+  timestamp        DateTime @default(now())
+  transaction_type String
+  amount           Decimal  @db.Decimal(15, 2)
+  source_id        String?
+  destination_id   String?
+  envelope_id      String?
+  payee_id         String?
+  description      String
+  metadata         Json?
+
+  user     User      @relation(fields: [user_id], references: [id])
+  envelope Envelope? @relation(fields: [envelope_id], references: [id])
+  payee    Payee?    @relation(fields: [payee_id], references: [id])
+
+  @@index([user_id, timestamp])
+  @@index([envelope_id, timestamp])
+  @@index([transaction_type])
+}
+
+model EmergencyWithdrawalRequest {
+  id            String    @id @default(uuid())
+  user_id       String
+  amount        Decimal   @db.Decimal(15, 2)
+  justification String
+  status        String    @default("PENDING")
+  requested_at  DateTime  @default(now())
+  approved_at   DateTime?
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@index([user_id, status])
+  @@index([requested_at])
+}
+
+model NotificationLog {
+  id                String   @id @default(uuid())
+  user_id           String
+  notification_type String
+  channel           String
+  message           String
+  status            String
+  sent_at           DateTime @default(now())
+  retry_count       Int      @default(0)
+  metadata          Json?
+
+  @@index([user_id, sent_at])
+  @@index([status])
+}
+
+model PaymentRequest {
+  id                 String   @id @default(uuid())
+  user_id            String
+  payment_reference  String   @unique
+  provider_reference String?
+  provider           String
+  amount             Decimal  @db.Decimal(15, 2)
+  currency           String   @default("RWF")
+  phone_number       String
+  status             String   @default("PENDING")
+  provider_status    String?
+  description        String?
+  error_message      String?
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+  metadata           Json?
+
+  @@index([user_id, status])
+  @@index([payment_reference])
+  @@index([created_at])
+}
