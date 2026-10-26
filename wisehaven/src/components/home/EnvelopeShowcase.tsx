@@ -287,7 +287,7 @@ export default function EnvelopeShowcase() {
   const [selected, setSelected] = useState<EnvelopeData | null>(null);
 
   return (
-    <section className="py-24 bg-[#060606]" aria-labelledby="envelope-heading">
+    <section id="envelopes" className="py-24 bg-[#060606]" aria-labelledby="envelope-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}

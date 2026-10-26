@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import HeroSection from "@/components/home/HeroSection";
+
+// Three.js references browser globals (WebGLRenderingContext, window, etc.)
+// at module-evaluation time — it must never run on the server.
+// ssr:false tells the Next.js bundler to skip this module during SSR entirely.
+const FlowWaveBackground = dynamic(
+  () => import("@/components/home/FlowWaveBackground"),
+  { ssr: false, loading: () => null }
+);
 import BudgetSimulator from "@/components/home/BudgetSimulator";
 import EnvelopeShowcase from "@/components/home/EnvelopeShowcase";
 import HowItWorks from "@/components/home/HowItWorks";
@@ -26,34 +35,34 @@ export default function HomePage() {
         Skip to main content
       </a>
 
-      {/* Hero — includes its own nav */}
-      <HeroSection />
+      {/* ── Three.js Flow Wave — fixed full-bleed underlay ─────────── */}
+      {/* Renders at z-index 0, pointer-events none — sits behind everything */}
+      <FlowWaveBackground />
 
-      <div id="main-content">
-        {/* Budget Simulator */}
-        <BudgetSimulator />
+      {/* ── Scroll host — gives the camera dive its 620 vh of travel ── */}
+      {/* position: relative + z-index: 1 stacks all page content above canvas */}
+      <div id="scroll-host" style={{ position: "relative", zIndex: 1 }}>
 
-        {/* Envelope Showcase */}
-        <EnvelopeShowcase />
+        {/* Hero — transparent background so the wave bleeds through */}
+        <HeroSection />
 
-        {/* How It Works */}
-        <HowItWorks />
+        <div id="main-content">
+          {/* All content sections sit on top of the wave canvas.
+              Each section keeps its own bg so content is readable;
+              the hero area above is intentionally transparent to let
+              the Three.js scene show through at full opacity. */}
+          <BudgetSimulator />
+          <EnvelopeShowcase />
+          <HowItWorks />
+          <EmergencyVaultFeature />
+          <WhyItMatters />
+          <FAQSection />
+          <FinalCTA />
+        </div>
 
-        {/* Emergency Vault Feature */}
-        <EmergencyVaultFeature />
-
-        {/* Why It Matters */}
-        <WhyItMatters />
-
-        {/* FAQ */}
-        <FAQSection />
-
-        {/* Final CTA */}
-        <FinalCTA />
+        <Footer />
       </div>
 
-      {/* Footer */}
-      <Footer />
     </>
   );
 }

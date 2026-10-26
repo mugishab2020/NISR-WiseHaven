@@ -248,4 +248,118 @@
   }
 }
 
+/* ── Hero section — HeroSection.tsx ──────────────────────── */
+
+@keyframes wh-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.75); }
+}
+
+@keyframes wh-fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes wh-hint-fade {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(6px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes wh-marquee {
+  0%   { transform: translateX(100vw); opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateX(-100%); opacity: 0; }
+}
+
+.wh-fade-up { animation: wh-fade-up 0.7s ease both; }
+
+.wh-marquee-track {
+  display: inline-flex;
+  align-items: center;
+  animation: wh-marquee 20s linear infinite;
+}
+
+/* ── Clay copy container ────────────────────────────────── */
+.wh-copy-clay {
+  background: rgba(8, 8, 8, 0.55);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: clamp(28px, 4vw, 52px) clamp(24px, 4vw, 48px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 16px 48px rgba(0,0,0,0.50),
+    0 1px 3px rgba(0,0,0,0.80);
+  position: relative;
+  overflow: hidden;
+}
+.wh-copy-clay::before {
+  content: "";
+  position: absolute;
+  top: -60px;
+  left: -60px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(190,245,50,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ── Video frame ────────────────────────────────────────── */
+.wh-video-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.wh-video-frame video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.wh-video-frame::after {
+  display: none;
+}
+
+/* ── Hero layout ────────────────────────────────────────── */
+.wh-hero-inner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(36px, 5vw, 72px) clamp(20px, 4vw, 56px);
+}
+
+/* Copy column — full width, card handles its own two-col split */
+.wh-hero-copy {
+  width: 100%;
+}
+.wh-copy-clay {
+  flex: 1;
+}
+@media (max-width: 767px) {
+  .wh-copy-clay { text-align: center; flex-direction: column !important; }
+  .wh-copy-clay .wh-cta-row { justify-content: center; }
+  .wh-copy-clay .wh-trust  { justify-content: center; }
+}
+
+/* Nav */
+.wh-nav-link {
+  color: #b7b8b1;
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.wh-nav-link:hover { color: #bef532; }
+
+.wh-cta-primary  { transition: transform 0.2s ease, background 0.2s ease; }
+.wh-cta-primary:hover  { transform: translateY(-2px); background: #d0ff65 !important; }
+
+.wh-cta-secondary { transition: color 0.2s; }
+.wh-cta-secondary:hover { color: #bef532 !important; }
+
+.wh-nav-cta { transition: transform 0.2s ease, background 0.2s ease; }
+.wh-nav-cta:hover { transform: translateY(-2px); background: #d0ff65 !important; }
+
 /* ── end of globals.css ───────────────────────────────────── */

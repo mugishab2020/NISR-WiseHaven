@@ -353,14 +353,14 @@ export default function BudgetSimulator() {
         </div>
 
         {/* ── Two columns ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
 
           {/* ── LEFT: Controls ── */}
           <motion.div
             initial={{ x: -24 }} whileInView={{ x: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="bg-[#111111] border border-[#242424] rounded-2xl p-6 flex flex-col gap-6"
+            className="bg-[#111111] border border-[#242424] rounded-2xl p-6 flex flex-col gap-6 h-full"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#BEF532]/8 border border-[#BEF532]/20">
@@ -475,7 +475,7 @@ export default function BudgetSimulator() {
             whileInView={{ x: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-col gap-4"
+            className="flex flex-col gap-4 h-full"
           >
             {/* Chart card */}
             <div className="bg-[#111111] border border-[#242424] rounded-2xl p-6 flex flex-col gap-6">
@@ -556,30 +556,30 @@ export default function BudgetSimulator() {
                 </motion.div>
               )}
             </div>
-
-            {/* Presets */}
-            <motion.div
-              initial={{ y: 12 }} whileInView={{ y: 0 }}
-              viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.25 }}
-              className="bg-[#111111] border border-[#242424] rounded-2xl p-4"
-            >
-              <p className="text-[#606060] text-[11px] font-mono uppercase tracking-wider mb-3">Quick presets</p>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { label: "Low income",  income: 80000,  rent: 30000,  food: 15000, utilities: 8000,  other: 5000,  vault: 10 },
-                  { label: "Mid salary",  income: 250000, rent: 100000, food: 20000, utilities: 15000, other: 25000, vault: 10 },
-                  { label: "High earner", income: 800000, rent: 300000, food: 80000, utilities: 40000, other: 100000, vault: 15 },
-                ].map((p) => (
-                  <motion.button key={p.label} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                    onClick={() => { setState({ income: p.income, vaultPct: p.vault, rent: p.rent, food: p.food, utilities: p.utilities, other: p.other, custom: [] }); setActiveIndex(0); }}
-                    className="px-3 py-1.5 rounded-lg border border-[#303030] text-[#A3A3A3] text-[12px] hover:border-[#BEF532]/40 hover:text-white hover:bg-[#BEF532]/5 transition-colors">
-                    {p.label}
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
           </motion.div>
         </div>
+
+        {/* ── Quick presets — centered below grid ── */}
+        <motion.div
+          initial={{ y: 12 }} whileInView={{ y: 0 }}
+          viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.25 }}
+          className="max-w-md mx-auto mt-6 bg-[#111111] border border-[#242424] rounded-2xl p-4"
+        >
+          <p className="text-[#606060] text-[11px] font-mono uppercase tracking-wider mb-3 text-center">Quick presets</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {[
+              { label: "Low income",  income: 80000,  rent: 30000,  food: 15000, utilities: 8000,  other: 5000,  vault: 10 },
+              { label: "Mid salary",  income: 250000, rent: 100000, food: 20000, utilities: 15000, other: 25000, vault: 10 },
+              { label: "High earner", income: 800000, rent: 300000, food: 80000, utilities: 40000, other: 100000, vault: 15 },
+            ].map((p) => (
+              <motion.button key={p.label} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
+                onClick={() => { setState({ income: p.income, vaultPct: p.vault, rent: p.rent, food: p.food, utilities: p.utilities, other: p.other, custom: [] }); setActiveIndex(0); }}
+                className="px-4 py-2 rounded-lg border border-[#303030] text-[#A3A3A3] text-[13px] hover:border-[#BEF532]/40 hover:text-white hover:bg-[#BEF532]/5 transition-colors">
+                {p.label}
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </section>
   );
