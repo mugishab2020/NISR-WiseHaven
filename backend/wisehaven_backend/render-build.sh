@@ -3,11 +3,16 @@
 
 set -o errexit  # Exit on error
 
-# Install Python dependencies
+echo "==> Installing Python dependencies..."
 pip install -r requirements.txt
 
-# Generate Prisma client and fetch query engine binaries
+echo "==> Generating Prisma client..."
 prisma generate --schema models/schema.prisma
 
-# Fetch Prisma query engine binaries for the deployment platform
+echo "==> Fetching Prisma query engine binaries..."
 prisma py fetch
+
+echo "==> Verifying binary exists..."
+python -c "from prisma import Prisma; print('Prisma client loaded successfully')"
+
+echo "==> Build complete!"
