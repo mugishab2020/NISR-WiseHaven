@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: wisehaven-backend
+    env: python
+    region: oregon
+    buildCommand: bash render-build.sh
+    startCommand: python -m uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.11
+      - key: DATABASE_URL
+        fromDatabase:
+          name: wisehaven-db
+          property: connectionString
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+
+databases:
+  - name: wisehaven-db
+    databaseName: wisehaven
+    user: wisehaven
+    region: oregon
