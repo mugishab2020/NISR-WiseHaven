@@ -1,14 +1,15 @@
-# 🚀 Deploy Fix - Ready to Deploy
+# 🚀 Deploy Fix - Ready to Deploy (Updated)
 
 ## Quick Summary
 
-The Prisma binary issue is fixed. The problem was missing `rootDir` in `render.yaml`.
+The Prisma binary issue is FIXED ✅. Build phase now works. Added diagnostic startup script to troubleshoot deployment.
 
 ## What Was Fixed
 
 ✅ Updated `render.yaml` to set `rootDir: backend/wisehaven_backend`  
 ✅ Build command now runs from correct directory  
-✅ Prisma binaries will be fetched during build phase  
+✅ Prisma binaries are fetched during build phase  
+✅ Added diagnostic startup script (`start-server.sh`) to identify any startup issues
 
 ## Deploy Steps (Do This Now)
 
@@ -16,8 +17,8 @@ The Prisma binary issue is fixed. The problem was missing `rootDir` in `render.y
 
 ```bash
 cd wisehaven_backend
-git add render.yaml FINAL_FIX.md
-git commit -m "Fix: Add rootDir to render.yaml for Prisma binary deployment"
+git add render.yaml start-server.sh DEPLOY_NOW.md
+git commit -m "Fix: Add diagnostic startup script for Render deployment"
 git push origin main
 ```
 
@@ -32,24 +33,36 @@ Go to your Render dashboard:
 
 ### 3. What You Should See
 
+First, diagnostic output from the startup script:
 ```
-==> Cloning repository...
-==> Building...
-==> Installing Python dependencies
-Collecting fastapi...
-Collecting prisma...
-==> Running: prisma generate --schema models/schema.prisma
-✔ Generated Prisma Client Python
-==> Running: prisma py fetch
-✔ Downloaded query engine binaries
-==> Build successful
-==> Deploying...
-==> Starting server
+==> Current directory: /opt/render/project/src/backend/wisehaven_backend
+==> Python version: Python 3.11.11
+==> Pip packages:
+prisma==0.11.0
+fastapi==0.104.1
+uvicorn==0.24.0
+clerk-backend-api==7.0.0
+==> Checking if main.py exists:
+-rw-r--r-- 1 render render 2934 Oct 28 08:00 main.py
+==> Checking environment variables:
+DATABASE_URL: postgresql://...
+CLERK_SECRET_KEY: SET
+ENVIRONMENT: production
+PORT: 10000
+==> Checking Prisma binary:
+✅ Prisma client loaded
+==> Testing imports:
+✅ Models imported
+✅ Controllers imported
+==> Starting uvicorn server...
 INFO: Started server process [63]
 INFO: Waiting for application startup.
 ✅ Connected to database
 INFO: Application startup complete
+INFO: Uvicorn running on http://0.0.0.0:10000
 ```
+
+If there's an error, you'll see exactly which step fails.
 
 ### 4. Verify Deployment
 
