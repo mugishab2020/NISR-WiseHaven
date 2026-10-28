@@ -3,7 +3,8 @@ services:
     name: wisehaven-backend
     env: python
     region: oregon
-    buildCommand: bash render-build.sh
+    rootDir: backend/wisehaven_backend
+    buildCommand: pip install -r requirements.txt && prisma generate --schema models/schema.prisma && prisma py fetch
     startCommand: python -m uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
