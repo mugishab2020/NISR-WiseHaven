@@ -15,5 +15,7 @@ services:
         sync: false
       - key: ENVIRONMENT
         value: production
+      - key: ALLOWED_ORIGINS
+        value: https://nisr-wise-haven.vercel.app,http://localhost:3000,http://127.0.0.1:3000
       - key: LOG_LEVEL
         value: INFO

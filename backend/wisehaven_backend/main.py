@@ -165,7 +165,9 @@ _raw_origins = os.getenv(
     "ALLOWED_ORIGINS",
     "http://localhost:3000,http://127.0.0.1:3000",
 )
-ALLOWED_ORIGINS: list[str] = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+ALLOWED_ORIGINS: list[str] = [
+    o.strip().rstrip("/") for o in _raw_origins.split(",") if o.strip()
+]
 
 # Register routers
 app.include_router(user_router)
