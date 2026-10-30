@@ -25,6 +25,8 @@
 - **Web app:** [nisr-wise-haven.vercel.app](https://nisr-wise-haven.vercel.app)
 - **Backend health:** [nisr-wisehaven.onrender.com/health](https://nisr-wisehaven.onrender.com/health)
 - **API documentation:** [nisr-wisehaven.onrender.com/docs](https://nisr-wisehaven.onrender.com/docs)
+- **Browser walkthrough:** [Watch the WiseHaven web demo](https://drive.google.com/file/d/1zrHV24Dxa-rXcBPAVxW6lBvbN-HcxMWA/view)
+- **Phone view:** [Watch the WiseHaven mobile demo](https://drive.google.com/file/d/1-qZriRrtHVzTeT2XB3AVSnsFZJ7bLo0U/view?usp=sharing)
 
 The web app requires sign-in. Use your own account; this project does not publish shared demo credentials. All balances and transactions are simulated.
 
