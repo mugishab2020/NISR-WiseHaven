@@ -161,13 +161,22 @@ async def add_security_headers(request: Request, call_next):
 # In production: set ALLOWED_ORIGINS env var to a comma-separated list of domains.
 # Never use allow_origins=["*"] in production with allow_credentials=True.
 
-_raw_origins = os.getenv(
-    "ALLOWED_ORIGINS",
-    "http://localhost:3000,http://127.0.0.1:3000",
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "")
+_configured_origins = {
+    origin.strip().rstrip("/")
+    for origin in _raw_origins.split(",")
+    if origin.strip()
+}
+# Always allow the deployed frontend even if Render has an older dashboard
+# override for ALLOWED_ORIGINS. Keep localhost available for local development.
+ALLOWED_ORIGINS = sorted(
+    _configured_origins
+    | {
+        "https://nisr-wise-haven.vercel.app",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    }
 )
-ALLOWED_ORIGINS: list[str] = [
-    o.strip().rstrip("/") for o in _raw_origins.split(",") if o.strip()
-]
 
 # Register routers
 app.include_router(user_router)
