@@ -1,6 +1,6 @@
 # WiseHaven — Give Every Franc a Purpose
 
-> **WiseHaven** is a smart, commitment-driven digital envelope budgeting wallet built for the Rwandan economic landscape. It converts passive budgeting intentions into active software enforcement — transforming lump-sum income into purpose-locked allocations that cannot be accessed before their maturity date.
+> **WiseHaven helps Rwandan households make income last until the next payday.** It turns a budget into an actionable plan: allocate simulated funds to bills and goals, lock money until its intended date, or release a controlled daily/weekly allowance. The Next.js app is backed by an authenticated FastAPI and PostgreSQL service.
 
 ![WiseHaven — Dark fintech UI, lime accent](https://img.shields.io/badge/WiseHaven-v0.1.0--demo-BEF532?style=for-the-badge&labelColor=000000&color=BEF532)
 ![Next.js 14](https://img.shields.io/badge/Next.js-14.2-black?style=for-the-badge&logo=next.js)
@@ -9,6 +9,30 @@
 ![MIT License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
 ---
+
+## At a glance
+
+| | |
+|---|---|
+| **Who it is for** | People managing household bills, savings goals, and irregular income |
+| **The problem** | Money intended for later expenses can be spent early, leaving predictable bills unfunded |
+| **The approach** | Purpose-based envelopes, time locks, scheduled allowances, and an emergency savings vault |
+| **What runs today** | Web app, Clerk sign-in, FastAPI API, PostgreSQL data model, wallet/envelope/activity/notification flows |
+| **Money status** | Simulated funds only; no real deposits, custody, yields, or payment settlement |
+
+### Try WiseHaven
+
+- **Web app:** [nisr-wise-haven.vercel.app](https://nisr-wise-haven.vercel.app)
+- **Backend health:** [nisr-wisehaven.onrender.com/health](https://nisr-wisehaven.onrender.com/health)
+- **API documentation:** [nisr-wisehaven.onrender.com/docs](https://nisr-wisehaven.onrender.com/docs)
+
+The web app requires sign-in. Use your own account; this project does not publish shared demo credentials. All balances and transactions are simulated.
+
+### A household use case
+
+Imagine a household receives **300,000 RWF**. They reserve a portion for emergency savings, allocate rent and utilities to separate envelopes, then schedule a weekly food allowance. The app shows available and reserved balances separately, records each change in the activity ledger, and releases only the configured allowance when due. This makes the plan visible and harder to casually spend ahead of its purpose.
+
+> **Hackathon prototype:** WiseHaven demonstrates budgeting and commitment behavior with simulated money. Payment-provider, biller, USSD, multilingual, and AI-coach integrations are future ideas in the roadmap.
 
 ## Table of Contents
 
@@ -63,7 +87,7 @@ Income Arrives
 └─────────────────────────┘
 ```
 
-**This milestone** is a functional browser prototype using **simulated money only**. No real deposits, withdrawals, Mobile Money transactions, or real financial custody occur.
+**Current implementation:** a deployed web application with a Next.js frontend and authenticated FastAPI/PostgreSQL backend. Financial operations use **simulated money only**. No real deposits, withdrawals, Mobile Money transactions, or financial custody occur.
 
 ---
 
@@ -90,15 +114,20 @@ WiseHaven addresses each of these directly by converting passive budgeting advic
 
 ## 3. Features
 
+| Capability | Status in this repository |
+|---|---|
+| Sign-in and per-user API access | Implemented with Clerk |
+| Wallet, envelopes, activity, and in-app notifications | Implemented with simulated balances and backend persistence |
+| Envelope maturity locks | Implemented as application rules; funds are not held by a financial institution |
+| Daily/weekly allowance schedule | Implemented as a release schedule processed by the running API service |
+| Deposit and payment settlement | Simulated only |
+| MTN/Airtel transfers, utility payments, USSD/SMS, French/Kinyarwanda, AI coach | Roadmap ideas; not implemented |
+
 ### ✦ Feature 1 — Smart Envelope Budgeting & Income Split
 
 Upon income receipt, the system prompts the user (via USSD or Mobile App) to configure an allocation plan. Income is distributed across customizable expense containers (e.g., 50,000 RWF for Rent, 20,000 RWF for Internet/Utilities, 60,000 RWF for Food).
 
-Each envelope carries:
-- A **locked allocation amount** in Rwandan Francs (RWF)
-- A **maturity date** after which payment is permitted
-- A **designated recipient** (landlord MoMo code, EUCL meter, WASAC bill ID, or school portal)
-- A real-time **lock progress tracker** showing elapsed time toward maturity
+An envelope can carry a **name**, category, balance, and (where configured) a maturity lock or allowance schedule. Recipient registration and real bill payment integrations are future work.
 
 **Behavioral purpose:** Forces pre-commitment when liquidity is highest, eliminating the mental-accounting drift that leads to early-month overspending.
 
@@ -184,19 +213,29 @@ stitch_finlock_budgeting_app_design_system/
 
 ## 5. Architecture
 
-### Current prototype (this repo)
+### Current implementation
 
 ```
-Browser
-  └── Next.js 14 App Router (TypeScript, Tailwind CSS)
-        ├── AppContext (React Context + localStorage)
-        ├── Immutable state mutations (store.ts)
-        ├── Financial validation layer (validation.ts)
-        ├── Currency & date utilities (currency.ts, dates.ts)
-        └── No external services — all simulated
+User's browser
+  └── Next.js 14 / TypeScript web app
+        ├── Clerk sign-in and protected app routes
+        └── API client sends authenticated requests
+              │ HTTPS + Bearer token
+              ▼
+        FastAPI / Python API
+        ├── Authenticated, user-scoped routes
+        ├── Wallet, envelopes, allocations, transactions, notifications
+        ├── Lock and allowance business rules
+        └── Scheduled allowance release task while service is running
+              │ Prisma Client Python
+              ▼
+        PostgreSQL
+        └── Users, wallets, envelopes, schedules, transactions, notifications
 ```
 
-### Production target architecture
+Balances and transaction records are persisted by the backend database. The frontend `AppContext` loads and refreshes API data; local storage is not the authoritative financial ledger. The current scheduler runs in the API process and is not a managed distributed job system.
+
+### Future architecture ideas
 
 ```
 +-------------------------------------------------------------------------+
@@ -234,14 +273,14 @@ Browser
                                           +-----------------------------------+
 ```
 
-**Planned integrations:**
+**Potential integrations (not implemented):**
 - **MTN MoMo API** / **Airtel Money API** — disbursement on envelope maturity
 - **Africa's Talking** — USSD gateway (`*182*...#`) for feature-phone access (rural coverage)
 - **REG / EUCL API** — direct Cashpower top-up on unlock
 - **WASAC** — water bill direct payment
 - **BNR Open Banking** — regulatory reporting and compliance
 
-**Security & Escrow:** Locked funds are held in regulated partner trust accounts (SACCO or commercial bank escrow vaults), earning micro-yields while preventing unauthorized early access.
+**Real-money custody and settlement are not implemented.** Any future escrow, yield, bank, telco, biller, or open-banking integration would require authorized partners, legal review, security controls, and operational readiness.
 
 ---
 
@@ -253,12 +292,16 @@ Browser
 | Language | TypeScript (strict mode) |
 | Styling | Tailwind CSS v3 with custom design tokens |
 | Icons | Lucide React |
-| State | React Context + localStorage |
+| Frontend state | React Context + authenticated API data |
+| Backend | FastAPI (Python) |
+| Database / ORM | PostgreSQL / Prisma Client Python |
+| Authentication | Clerk (frontend sign-in and backend token validation) |
+| Background work | In-process scheduled allowance release loop |
 | Fonts | Geist · Inter · JetBrains Mono (Google Fonts) |
 | Linting | ESLint (next/core-web-vitals) |
 | Type checking | TypeScript `tsc --noEmit` |
 | CI/CD | GitHub Actions |
-| Hosting (planned) | Vercel (preview) / AWS (production) |
+| Hosting | Vercel (web) / Render (API, as configured) |
 
 ---
 
@@ -268,8 +311,11 @@ Browser
 
 - Node.js ≥ 18
 - npm ≥ 9
+- Python 3.11 for the backend
+- PostgreSQL database
+- Clerk application keys for authenticated local use
 
-### Installation
+### Frontend
 
 ```bash
 # Clone the repository
@@ -279,11 +325,30 @@ cd NISR-WiseHaven/wisehaven
 # Install dependencies
 npm install
 
+# Configure the frontend environment (see wisehaven/.env.example if present)
+# Set NEXT_PUBLIC_API_URL and the Clerk publishable/secret keys
+
 # Start development server
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Backend
+
+In a second terminal, configure the backend environment with a PostgreSQL `DATABASE_URL`, `CLERK_SECRET_KEY`, and `ALLOWED_ORIGINS` containing `http://localhost:3000`. Then:
+
+```bash
+cd backend/wisehaven_backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+prisma generate --schema models/schema.prisma
+prisma migrate deploy --schema models/schema.prisma
+python -m uvicorn main:app --reload --port 8000
+```
+
+Set the frontend `NEXT_PUBLIC_API_URL` to `http://localhost:8000`. Clerk frontend and backend keys must belong to the same Clerk application/environment.
 
 ### Available commands
 
@@ -295,23 +360,11 @@ npm run lint       # Run ESLint
 npx tsc --noEmit   # TypeScript type check
 ```
 
-### Demo account
+### First run
 
-The app loads with a pre-seeded demo account (no sign-in required):
+Sign in with the configured Clerk account, then use the deposit flow to add **simulated** funds to your account. Create envelopes, allocate funds, and explore lock/allowance behavior. No shared credentials or preloaded cross-user balances are provided.
 
-| Item | Value |
-|---|---|
-| Total funds | 250,000 RWF |
-| Emergency Vault | 25,000 RWF |
-| Rent envelope | 100,000 RWF · matures in 9 days |
-| Food envelope | 20,000 RWF · matures in 3 days |
-| Utilities envelope | 15,000 RWF · unlocking soon (1 day) |
-| Education envelope | 25,000 RWF · matures in 14 days |
-| Available (unallocated) | 65,000 RWF |
-
-> ⚠️ **All figures are simulated demo data.** No real money exists or is at risk.
-
-To reset the demo back to defaults: **Settings → Reset Demo Data**.
+> ⚠️ Every amount is simulated demo money. No real funds exist or are at risk.
 
 ---
 
@@ -371,7 +424,7 @@ NISR-WiseHaven/
 
 ## 9. Demo Data & Financial Model
 
-All financial state is stored in browser `localStorage` under the key `wisehaven_demo_v1`.
+The backend PostgreSQL database is the source of truth for authenticated wallet and envelope balances and transaction records. The frontend fetches this data through the API; React context holds the current client-side view. Do not treat browser local storage as the authoritative ledger.
 
 ### Balance invariant
 
@@ -381,7 +434,7 @@ The following equation must always hold:
 totalFunds = vaultBalance + Σ(active envelope amounts) + availableFunds
 ```
 
-Example with seed data:
+Example balance breakdown (illustrative simulated data):
 
 ```
 250,000 = 25,000 (vault)
@@ -395,19 +448,19 @@ Example with seed data:
 
 ### Key financial rules
 
-1. **Vault sweep applied once** — only on confirmed deposit, never on preview
-2. **Locked funds are non-spendable** — `confirmPayment()` throws if `!isMatured()`
-3. **No floating point** — all RWF amounts are integers
-4. **Single source of truth** — balances are derived from `DemoAccount`, never hardcoded in UI
-5. **Atomic mutations** — deposit, allocation, and payment each produce a new immutable state object
+1. **Backend validation** — wallet and envelope operations are validated server-side.
+2. **Locked balance separation** — scheduled allowance funds are reserved separately from currently available envelope funds.
+3. **Ledger records** — financial actions are represented by persisted transaction records.
+4. **Database transactions and guarded updates** — critical balance updates use transactional and concurrency protections where implemented.
+5. **Simulated value only** — ledger entries do not represent claims on real money.
 
-### ⚠️ Prototype limitations
+### ⚠️ Current limitations
 
-- State exists only in your browser's `localStorage` — not synced across devices or tabs
-- No authentication — anyone with browser access can view the demo
-- Maturity timers use the client's local clock — accurate within the device's timezone
-- No real money, no real bank, no real payment API
-- These safeguards must be enforced server-side before any production deployment
+- Deposits and payments are simulated; there is no real payment or custody integration.
+- Scheduled allowance releases are processed by a background loop in the API process; this is not a durable, independently operated job queue.
+- Notification delivery is in-app; SMS/USSD delivery is not implemented.
+- Some UI copy or design references may describe future integrations; use the feature status and roadmap as the source of truth.
+- Production use with real funds would require additional compliance, security, partner, reconciliation, support, and reliability work.
 
 ---
 
@@ -456,41 +509,128 @@ Production deployments are intentionally **manual-trigger-only** to prevent acci
 
 ## 11. Roadmap
 
-### Milestone 1 — Current ✅
-- [x] Next.js prototype with full UI from Stitch designs
-- [x] Simulated envelope budgeting with temporal locks
-- [x] Emergency Vault with first-sweep automation
-- [x] Simulated deposit and payment confirmation flows
-- [x] localStorage persistence + demo reset
-- [x] Mobile-first responsive design
-- [x] GitHub Actions CI/CD pipeline (lint → typecheck → build → Vercel deploy)
+The roadmap is grouped into product versions. **Version 1 contains the four foundational milestones** that define WiseHaven's core budgeting experience. Later versions below are a broad idea bank for discussion; they are possibilities, not committed scope or claims that integrations are already available.
 
-### Milestone 2 — Backend & Auth ✅
-- [x] FastAPI (Python) backend with PostgreSQL ledger
-- [x] Clerk authentication across frontend and backend (JWT verification, per-user isolation)
-- [x] Real envelope lock enforcement server-side (disbursements rejected when locked)
-- [x] Wallet service with atomic balance mutations, optimistic locking, and idempotency keys
-- [x] Payee registry, allocation plans, disbursement service, notification service
-- [x] Rate limiting, secure HTTP headers, CORS, request size limits
-- [x] 33/33 automated API tests passing
-- [ ] Celery + Redis task queue for server-side maturity notifications and SMS triggers (deferred to Milestone 4)
+### Version 1 — WiseHaven foundations
 
-### Milestone 3 — Payment Integrations
-- [ ] MTN MoMo Disbursements API
-- [ ] Airtel Money Disbursements API
-- [ ] EUCL / REG direct Cashpower top-up
-- [ ] WASAC water bill payment integration
+#### Milestone 1 — Purpose-based envelope budgeting
+- [x] Create named envelopes for expenses and savings goals
+- [x] Allocate available wallet balance across envelopes
+- [x] View envelope balances and activity
+- [ ] Allocation templates for common Rwanda household budgets
+- [ ] Recurring income and one-tap monthly budget setup
 
-### Milestone 4 — USSD & Accessibility
-- [ ] Africa's Talking USSD gateway (`*182*...#`)
-- [ ] Feature phone support for rural users
-- [ ] SMS notification on envelope maturity
+#### Milestone 2 — Commitment tools and scheduled allowances
+- [x] Protect funds with envelope maturity locks
+- [x] Release a configured daily or weekly allowance from a reserved envelope balance
+- [x] Show available and locked amounts separately
+- [ ] Flexible lock rules, grace periods, and user-defined release schedules
+- [ ] Clear recovery flow for mistaken locks and account access problems
 
-### Milestone 5 — Production & Compliance
-- [ ] BNR regulatory compliance review
-- [ ] Partner SACCO / commercial bank escrow integration (regulated fund custody)
-- [ ] PWA manifest + service worker for offline support
-- [ ] Fraud detection, rate limiting, and audit trails
+#### Milestone 3 — Emergency savings vault
+- [x] Dedicated Emergency Vault envelope
+- [x] First-sweep savings behavior in the budgeting experience
+- [ ] User-configurable savings percentage, target, and pause controls
+- [ ] Progress milestones and opt-in reminders
+- [ ] Regulated savings partner exploration before offering real custody or yield
+
+#### Milestone 4 — Secure account and money activity experience
+- [x] Authenticated accounts and per-user data isolation
+- [x] Backend wallet, envelopes, transaction history, and notifications
+- [x] Server-side financial validation and security controls
+- [ ] Production-grade reliability, observability, and incident response
+- [ ] Independent security review and operational readiness before real-money use
+
+**Version 1 boundary:** WiseHaven is currently a simulated-money product. Real deposits, custody, transfers, bill settlement, and financial returns require additional technical, partner, legal, and regulatory work.
+
+### Version 2 — Local languages, access, and financial confidence (ideas)
+
+- [ ] Add French and Kinyarwanda alongside English
+- [ ] Translate onboarding, navigation, notifications, error messages, help content, and financial education—not only labels
+- [ ] Let users choose a language and remember that preference across devices
+- [ ] Review translations with native speakers and test financial terms for clarity
+- [ ] Improve accessibility: screen-reader labels, keyboard navigation, contrast, text scaling, and reduced motion
+- [ ] Design low-bandwidth pages and graceful retry behavior for unreliable connections
+- [ ] Add optional SMS and USSD journeys for users without smartphones or mobile data
+- [ ] Support feature-phone friendly account recovery and notification preferences
+- [ ] Offer plain-language explanations of envelope locks, fees, and scheduled releases
+- [ ] Add configurable reminders for bills, income dates, savings goals, and upcoming releases
+- [ ] Explore household mode with explicit invitations, permissions, and shared goals
+- [ ] Add downloadable statements and user-controlled data export
+
+### Version 3 — Personal AI money coach (ideas)
+
+- [ ] Add an opt-in AI assistant that explains spending patterns and helps users plan budgets
+- [ ] Suggest envelope amounts from user-approved income, bills, goals, and past activity
+- [ ] Explain trade-offs in simple language: for example, how changing a savings amount affects the rent or food envelope
+- [ ] Let users ask questions in English, French, or Kinyarwanda
+- [ ] Provide bill-calendar summaries and identify likely shortfalls before due dates
+- [ ] Suggest realistic savings targets and small adjustments, with the user making the final choice
+- [ ] Explain why each recommendation was made and which data informed it
+- [ ] Make recommendations optional, editable, and easy to dismiss; never move money without user approval
+- [ ] Set privacy controls for AI features, including opt-in, data retention choices, and deletion
+- [ ] Evaluate advice for bias, hallucinations, safety, and local financial context before release
+- [ ] Clearly distinguish educational guidance from regulated financial advice
+
+### Version 4 — Payments and trusted financial partnerships (ideas)
+
+- [ ] Evaluate MTN MoMo and Airtel Money integrations with authorized partners
+- [ ] Explore utility and bill payment workflows for electricity, water, education, and other recurring obligations
+- [ ] Add verified recipient details, payment previews, explicit confirmation, and receipts
+- [ ] Design idempotent payment requests, reconciliation, refunds, and support workflows
+- [ ] Assess regulated partner custody, escrow, or savings products; do not hold real customer funds without the required authorization
+- [ ] Publish transparent fees, limits, settlement timelines, and failure handling
+- [ ] Conduct legal and regulatory review for Rwanda and any future operating markets
+- [ ] Complete partner security reviews and end-to-end payment testing before enabling live transactions
+
+### Version 5 — USSD, SMS, and inclusive reach (ideas)
+
+- [ ] Pilot a USSD menu with a licensed or authorized gateway provider
+- [ ] Check balances, review envelopes, receive reminders, and confirm supported actions from feature phones
+- [ ] Use short, accessible Kinyarwanda, French, and English menu flows
+- [ ] Add SMS notices for due dates, releases, security events, and payment outcomes
+- [ ] Make sensitive actions require appropriate authentication and confirmation
+- [ ] Design for session timeouts, interrupted requests, shared phones, and limited literacy
+- [ ] Test with users in rural and urban communities before expanding availability
+
+### Version 6 — Goals, household planning, and resilience (ideas)
+
+- [ ] Create goal journeys for school fees, rent, healthcare, agriculture inputs, and major purchases
+- [ ] Add seasonal and irregular-income budgeting for farmers, traders, and gig workers
+- [ ] Provide a bill calendar with recurring due dates and income events
+- [ ] Let users model “what if” budgets without changing real balances
+- [ ] Add configurable buffers for price changes and unexpected expenses
+- [ ] Support multiple budgets or wallets where the product and partners permit
+- [ ] Explore household collaboration with role-based access and private personal envelopes
+- [ ] Add voluntary financial education in short, locally relevant lessons
+
+### Version 7 — Trust, safety, and platform maturity (ideas)
+
+- [ ] Add stronger account security options, session management, and recovery protections
+- [ ] Create clear audit history for sign-ins, profile changes, allocations, and payment actions
+- [ ] Add user-configurable transaction alerts and suspicious-activity reporting
+- [ ] Establish data minimization, retention, export, and deletion policies
+- [ ] Add service health monitoring, backups, disaster recovery, and tested restoration procedures
+- [ ] Build operational dashboards for delivery failures, reconciliation, and support cases
+- [ ] Perform independent penetration testing and remediate findings
+- [ ] Publish uptime, support, privacy, and security practices appropriate to the service maturity
+
+### Version 8 — Ecosystem and expansion (ideas)
+
+- [ ] Explore integrations with SACCOs, banks, employers, cooperatives, and community organizations
+- [ ] Enable employer or cooperative budgeting tools only with clear consent and separation of personal data
+- [ ] Offer documented APIs and partner sandbox environments after the core platform is stable
+- [ ] Research additional local currencies, countries, and language needs before expansion
+- [ ] Measure outcomes such as bill readiness, savings consistency, and user-reported financial confidence
+- [ ] Publish transparent impact reporting without exposing individual financial data
+
+### Principles for future versions
+
+1. **Users stay in control:** recommendations and scheduled actions are transparent, revocable where feasible, and confirmed by the user.
+2. **Protect privacy:** collect only necessary data and explain how each feature uses it.
+3. **Build for local realities:** validate language, connectivity, income patterns, and payment workflows with the people who will use them.
+4. **Earn trust before handling real money:** partner authorization, compliance, security, support, and reconciliation come before live financial integrations.
+5. **Ship through evidence:** each version should be shaped by user research, partner readiness, and measurable outcomes.
 
 ---
 
