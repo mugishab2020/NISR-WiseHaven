@@ -12,10 +12,7 @@ prisma generate --schema models/schema.prisma
 echo "==> Fetching Prisma query engine binaries..."
 prisma py fetch
 
-echo "==> Ensuring Prisma query engine is executable..."
-find /opt/render/.cache/prisma-python/binaries -type f -name '*query-engine-*' -exec chmod u+x {} +
-
-echo "==> Verifying generated client and query engine..."
-python -c "import os; from pathlib import Path; from prisma import Prisma; from prisma.client import BINARY_PATHS; from prisma.binaries import platform; target = platform.binary_platform(); raw = BINARY_PATHS.query_engine.get(target); assert raw, f'No Prisma query engine configured for {target}'; engine = Path(raw); assert engine.is_file() and os.access(engine, os.X_OK), f'Prisma query engine missing or not executable: {engine}'; assert hasattr(Prisma(), 'transaction'); print(f'Generated Prisma client and query engine ready: {engine}')"
+echo "==> Bundling Prisma query engine with the deployed service..."
+python -c "import shutil; from pathlib import Path; from prisma import Prisma; from prisma.client import BINARY_PATHS; from prisma.binaries import platform; from prisma.engine.utils import query_engine_name; target = platform.binary_platform(); raw = BINARY_PATHS.query_engine.get(target); assert raw, f'No Prisma query engine configured for {target}'; source = Path(raw); assert source.is_file(), f'Fetched Prisma query engine is missing: {source}'; engine = Path.cwd() / query_engine_name(); shutil.copy2(source, engine); engine.chmod(0o755); assert engine.is_file() and hasattr(Prisma(), 'transaction'); print(f'Bundled Prisma query engine: {engine}')"
 
 echo "==> Build complete!"
