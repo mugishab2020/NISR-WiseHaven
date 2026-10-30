@@ -11,6 +11,7 @@ from views.wallet_schemas import (
     FundingResponse
 )
 from services.wallet_service import WalletService
+from services.notification_service import NotificationService
 from models import db
 from utils.dependencies import get_current_user_id
 import logging
@@ -127,12 +128,24 @@ async def add_manual_deposit(
         wallet, transaction_id = await service.add_manual_deposit(
             user_id=user_id,
             amount=request.amount,
-            description=request.description
+            description=request.description,
+            idempotency_key=request.idempotency_key,
         )
-        
+
+        # Fire in-app notification (non-blocking — failure must not abort the deposit)
+        try:
+            notif_svc = NotificationService(db)
+            await notif_svc.notify_deposit(
+                user_id=user_id,
+                amount=float(request.amount),
+                transaction_id=transaction_id,
+            )
+        except Exception as notif_err:
+            logger.warning("Deposit notification failed (non-fatal): %s", notif_err)
+
         return {
             "success": True,
-            "message": f"Successfully deposited {request.amount} to wallet",
+            "message": f"Successfully added {request.amount} demo RWF to wallet",
             "wallet": wallet,
             "transaction_id": transaction_id
         }
@@ -152,8 +165,6 @@ async def add_manual_deposit(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to add funds: {str(e)}"
         )
-
-
 # ============================================================================
 # MOMO INTEGRATION ENDPOINTS - COMMENTED OUT FOR NOW
 # 

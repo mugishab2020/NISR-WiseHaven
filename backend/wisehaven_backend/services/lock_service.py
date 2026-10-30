@@ -1,7 +1,11 @@
 """Temporal lock service for envelope time-based constraints."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from prisma import Prisma
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 class LockService:
@@ -28,7 +32,7 @@ class LockService:
             ValueError if timestamp is not in future or lock already exists
         """
         # Validate timestamp is in future
-        if maturity_timestamp <= datetime.utcnow():
+        if maturity_timestamp <= _utcnow():
             raise ValueError("Maturity timestamp must be in the future")
         
         # Check if envelope exists
@@ -78,7 +82,7 @@ class LockService:
             return "NONE"
         
         lock = envelope.temporal_lock
-        if lock.maturity_timestamp > datetime.utcnow():
+        if lock.maturity_timestamp > _utcnow():
             return "LOCKED"
         else:
             return "RELEASED"
@@ -112,7 +116,7 @@ class LockService:
         """
         locks = await self.db.temporallock.find_many(
             where={
-                "maturity_timestamp": {"lte": datetime.utcnow()},
+                "maturity_timestamp": {"lte": _utcnow()},
                 "notified": False
             },
             include={"envelope": {"include": {"user": True}}}

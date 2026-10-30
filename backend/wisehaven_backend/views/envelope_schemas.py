@@ -14,11 +14,33 @@ class EnvelopeCreateRequest(BaseModel):
     @field_validator('category')
     @classmethod
     def validate_category(cls, v):
-        """Validate category is one of the standard categories."""
-        valid_categories = ["Rent", "Food", "Utilities", "Transport", "Healthcare", "Education", "Custom"]
-        if v not in valid_categories:
-            raise ValueError(f'Category must be one of: {", ".join(valid_categories)}')
-        return v
+        """Accept both backend category names and frontend category keys."""
+        # Backend canonical categories
+        backend_categories = {
+            "Rent", "Food", "Utilities", "Transport",
+            "Healthcare", "Education", "Custom", "Emergency",
+        }
+        # Frontend category keys → canonical backend names
+        frontend_map = {
+            "shelter":    "Rent",
+            "food":       "Food",
+            "utilities":  "Utilities",
+            "transport":  "Transport",
+            "healthcare": "Healthcare",
+            "education":  "Education",
+            "family":     "Custom",
+            "business":   "Custom",
+            "custom":     "Custom",
+        }
+        if v in backend_categories:
+            return v
+        mapped = frontend_map.get(v.lower())
+        if mapped:
+            return mapped
+        raise ValueError(
+            f'Category must be one of: {", ".join(sorted(backend_categories))} '
+            f'or a frontend key like shelter, food, utilities, transport, healthcare, education, custom'
+        )
 
 
 class EnvelopeUpdateRequest(BaseModel):
@@ -36,7 +58,12 @@ class TemporalLockRequest(BaseModel):
     @classmethod
     def validate_future_timestamp(cls, v):
         """Validate that maturity timestamp is in the future."""
-        if v <= datetime.utcnow():
+        from datetime import timezone as tz
+        now = datetime.now(tz.utc)
+        # Make v timezone-aware if it isn't already
+        if v.tzinfo is None:
+            v = v.replace(tzinfo=tz.utc)
+        if v <= now:
             raise ValueError('Maturity timestamp must be in the future')
         return v
 
@@ -67,3 +94,19 @@ class EnvelopeResponse(BaseModel):
 class EnvelopeListResponse(BaseModel):
     """Response schema for list of envelopes."""
     envelopes: list[EnvelopeResponse]
+
+
+class FundEnvelopeRequest(BaseModel):
+    """Request schema for funding an envelope from the wallet."""
+    amount: Decimal = Field(..., gt=0, description="Amount to allocate (must be positive)")
+    description: str | None = Field(None, max_length=200, description="Optional description")
+
+
+class FundEnvelopeResponse(BaseModel):
+    """Response schema after funding an envelope."""
+    envelope_id: str
+    envelope_name: str
+    amount: Decimal
+    new_envelope_balance: Decimal
+    new_wallet_balance: Decimal
+    transaction_id: str

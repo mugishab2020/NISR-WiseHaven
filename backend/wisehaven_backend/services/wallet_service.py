@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 from datetime import datetime, timezone
-from prisma import Prisma
+from prisma import Json, Prisma
 from prisma.errors import UniqueViolationError
 import logging
 
@@ -75,34 +75,52 @@ class WalletService:
         self,
         user_id: str,
         amount: Decimal,
-        description: str = "Manual deposit"
+        description: str = "Demo deposit",
+        idempotency_key: str | None = None,
     ) -> tuple[dict, str]:
-        """Add funds to wallet via manual deposit.
-        
-        This is a REAL deposit that credits the user's actual wallet balance.
-        Use this when user deposits money externally (bank transfer, cash, etc.)
-        and you need to credit their wallet manually.
-        
-        Uses optimistic locking with version field to prevent race conditions.
-        Creates immutable transaction record for traceability.
-        
+        """Add simulated demo funds to wallet.
+
+        This is a demo-only operation. No real money is involved.
+
+        If idempotency_key is provided, duplicate requests with the same key
+        return the existing transaction rather than crediting the wallet twice.
+
         Args:
             user_id: User's unique identifier
             amount: Amount to add (must be positive)
             description: Description of the deposit
-            
+            idempotency_key: Optional client-supplied key for deduplication
+
         Returns:
             Tuple of (updated wallet dict, transaction_id)
-            
+
         Raises:
             ValueError if amount invalid or wallet not found
         """
         if amount <= 0:
             raise ValueError("Amount must be greater than zero")
-        
-        # Validate decimal places
+
         if amount.as_tuple().exponent < -2:
             raise ValueError("Amount must have at most 2 decimal places")
+
+        # Idempotency check: if we've already processed this key, return early
+        if idempotency_key:
+            existing_txs = await self.db.transaction.find_many(
+                where={
+                    "user_id": user_id,
+                    "transaction_type": "MANUAL_DEPOSIT",
+                    "description": f"Demo deposit [{idempotency_key}]",
+                }
+            )
+            if existing_txs:
+                logger.info(f"Idempotent deposit: returning existing tx {existing_txs[0].id}")
+                wallet = await self.db.wallet.find_unique(where={"user_id": user_id})
+                return self._format_wallet_response(wallet), existing_txs[0].id
+
+        # Build description including idempotency key for lookup
+        effective_description = (
+            f"Demo deposit [{idempotency_key}]" if idempotency_key else description
+        )
         
         max_retries = 3
         for attempt in range(max_retries):
@@ -144,16 +162,18 @@ class WalletService:
                     # Create immutable transaction record
                     transaction_record = await transaction_db.transaction.create(
                         data={
-                            "user_id": user_id,
+                            "user": {"connect": {"id": user_id}},
                             "transaction_type": "MANUAL_DEPOSIT",
                             "amount": amount,
-                            "description": description,
+                            "description": effective_description,
                             "timestamp": self._get_utc_now(),
-                            "metadata": {
+                            "metadata": Json({
                                 "previous_balance": str(wallet.balance),
                                 "new_balance": str(new_balance),
-                                "wallet_version": current_version + 1
-                            }
+                                "wallet_version": current_version + 1,
+                                "demo": True,
+                                **({"idempotency_key": idempotency_key} if idempotency_key else {}),
+                            }),
                         }
                     )
                     
@@ -245,17 +265,17 @@ class WalletService:
                     # Create immutable transaction record
                     transaction_record = await transaction_db.transaction.create(
                         data={
-                            "user_id": user_id,
+                            "user": {"connect": {"id": user_id}},
                             "transaction_type": "DEPOSIT",
                             "amount": amount,
                             "description": description,
                             "timestamp": self._get_utc_now(),
-                            "metadata": {
+                            "metadata": Json({
                                 "previous_balance": str(wallet.balance),
                                 "new_balance": str(new_balance),
                                 "wallet_version": current_version + 1,
                                 "payment_reference": payment_reference
-                            }
+                            }),
                         }
                     )
                     
@@ -338,16 +358,16 @@ class WalletService:
                     # Create transaction record
                     await transaction_db.transaction.create(
                         data={
-                            "user_id": user_id,
+                            "user": {"connect": {"id": user_id}},
                             "transaction_type": "ALLOCATION",
                             "amount": amount,
                             "description": description,
                             "timestamp": self._get_utc_now(),
-                            "metadata": {
+                            "metadata": Json({
                                 "previous_balance": str(wallet.balance),
                                 "new_balance": str(new_balance),
                                 "wallet_version": current_version + 1
-                            }
+                            }),
                         }
                     )
                 

@@ -1,9 +1,11 @@
 "use client";
 
 // ============================================================
-// WiseHaven — Global App State Context
-// Wraps the entire client tree. Provides demo account state
-// and mutation functions to all client components.
+// WiseHaven — Global App State Context (Backend-Authoritative)
+//
+// Financial data comes from the FastAPI backend (PostgreSQL).
+// localStorage is used ONLY for UI preferences (privacyMode).
+// All demo balances are simulated — no real money involved.
 // ============================================================
 
 import React, {
@@ -15,153 +17,226 @@ import React, {
   type ReactNode,
 } from "react";
 import Image from "next/image";
-import type { DemoAccount, Envelope } from "@/types";
+import { useAuth } from "@clerk/nextjs";
 import {
-  loadAccount,
-  saveAccount,
-  resetAccount,
-  applyDeposit,
-  allocateEnvelope,
-  confirmPayment,
-  updateVaultSettings,
-  computeAvailableFunds,
-  computeLockedTotal,
-  computeEnvelopeStatus,
-  newTxId,
-} from "@/lib/store";
+  walletApi,
+  envelopeApi,
+  transactionApi,
+  notificationApi,
+  type WalletResponse,
+  type EnvelopeResponse,
+  type TransactionResponse,
+  type UserProfile,
+  type BalanceResponse,
+  type NotificationResponse,
+  ApiError,
+} from "@/lib/api";
 
-// ── Context shape ──────────────────────────────────────────
+// ── Types ──────────────────────────────────────────────────
+
+export interface AppState {
+  wallet: WalletResponse | null;
+  envelopes: EnvelopeResponse[];
+  transactions: TransactionResponse[];
+  balances: BalanceResponse[];
+  notifications: NotificationResponse[];
+  unreadCount: number;
+  userProfile: UserProfile | null;
+  /** Available wallet balance (wallet.balance) */
+  availableBalance: number;
+  /** Sum of all envelope balances */
+  totalInEnvelopes: number;
+  /** Emergency vault balance */
+  vaultBalance: number;
+  /** Emergency vault envelope */
+  vaultEnvelope: EnvelopeResponse | null;
+}
 
 interface AppContextValue {
-  account: DemoAccount;
-  availableFunds: number;
-  lockedTotal: number;
+  state: AppState;
   isLoading: boolean;
+  /** True while a mutation is in flight */
+  isMutating: boolean;
+  error: string | null;
   privacyMode: boolean;
   togglePrivacyMode: () => void;
-  doDeposit: (amount: number) => void;
-  doAllocateEnvelope: (
-    envelope: Omit<Envelope, "id" | "status" | "createdAt">
-  ) => void;
-  doConfirmPayment: (envelopeId: string) => void;
-  doUpdateVaultSettings: (
-    settings: Partial<DemoAccount["vaultSettings"]>
-  ) => void;
-  doReset: () => void;
-  refreshStatuses: () => void;
+  /** Re-fetch wallet + envelopes + transactions + notifications from backend */
+  refresh: () => Promise<void>;
+  /** Re-fetch notifications only (lightweight for badge polling) */
+  refreshNotifications: () => Promise<void>;
+  /** Clear the error state */
+  clearError: () => void;
 }
+
+const EMPTY_STATE: AppState = {
+  wallet: null,
+  envelopes: [],
+  transactions: [],
+  balances: [],
+  notifications: [],
+  unreadCount: 0,
+  userProfile: null,
+  availableBalance: 0,
+  totalInEnvelopes: 0,
+  vaultBalance: 0,
+  vaultEnvelope: null,
+};
 
 const AppContext = createContext<AppContextValue | null>(null);
 
 // ── Provider ───────────────────────────────────────────────
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [account, setAccount] = useState<DemoAccount | null>(null);
+  const { getToken, isLoaded: clerkLoaded, isSignedIn } = useAuth();
+
+  const [state, setState] = useState<AppState>(EMPTY_STATE);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMutating, setIsMutating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load from localStorage on mount (client only)
+  // Privacy mode lives in localStorage (pure UI preference, no financial data)
+  const [privacyMode, setPrivacyMode] = useState(false);
   useEffect(() => {
-    const loaded = loadAccount();
-    // Refresh envelope statuses on load
-    const refreshed = {
-      ...loaded,
-      envelopes: loaded.envelopes.map((e) => ({
-        ...e,
-        status: computeEnvelopeStatus(e),
-      })),
-    };
-    setAccount(refreshed);
-    setIsLoading(false);
+    try {
+      const stored = localStorage.getItem("wisehaven_privacy_mode");
+      if (stored === "true") setPrivacyMode(true);
+    } catch {}
   }, []);
-
-  // Persist whenever account changes
-  useEffect(() => {
-    if (account) saveAccount(account);
-  }, [account]);
-
-  // Periodically refresh envelope statuses (every 30s)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAccount((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          envelopes: prev.envelopes.map((e) => ({
-            ...e,
-            status: computeEnvelopeStatus(e),
-          })),
-        };
-      });
-    }, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const mutate = useCallback((updater: (prev: DemoAccount) => DemoAccount) => {
-    setAccount((prev) => {
-      if (!prev) return prev;
-      return updater(prev);
+  const togglePrivacyMode = useCallback(() => {
+    setPrivacyMode((prev) => {
+      const next = !prev;
+      try { localStorage.setItem("wisehaven_privacy_mode", String(next)); } catch {}
+      return next;
     });
   }, []);
 
-  const togglePrivacyMode = useCallback(() => {
-    mutate((prev) => ({ ...prev, privacyMode: !prev.privacyMode }));
-  }, [mutate]);
+  // ── Data fetching ────────────────────────────────────────
 
-  const doDeposit = useCallback(
-    (amount: number) => {
-      mutate((prev) => applyDeposit(prev, amount, newTxId()));
-    },
-    [mutate]
-  );
+  const fetchAll = useCallback(async () => {
+    if (!clerkLoaded || !isSignedIn) return;
 
-  const doAllocateEnvelope = useCallback(
-    (envelope: Omit<Envelope, "id" | "status" | "createdAt">) => {
-      mutate((prev) => allocateEnvelope(prev, envelope, newTxId()));
-    },
-    [mutate]
-  );
+    try {
+      setError(null);
+      const token = () => getToken();
 
-  const doConfirmPayment = useCallback(
-    (envelopeId: string) => {
-      mutate((prev) => confirmPayment(prev, envelopeId, newTxId()));
-    },
-    [mutate]
-  );
+      // Fetch in parallel
+      const [walletRes, envelopesRes, txRes, balancesRes, notifRes] = await Promise.all([
+        walletApi.getWallet(token),
+        envelopeApi.list(token),
+        transactionApi.list(token, { page_size: 50 }),
+        transactionApi.balances(token),
+        notificationApi.list(token, { limit: 50 }).catch(() => ({ notifications: [], total_count: 0, unread_count: 0 })),
+      ]);
 
-  const doUpdateVaultSettings = useCallback(
-    (settings: Partial<DemoAccount["vaultSettings"]>) => {
-      mutate((prev) => updateVaultSettings(prev, settings));
-    },
-    [mutate]
-  );
+      const envelopes = envelopesRes.envelopes;
+      const vaultEnvelope = envelopes.find((e) => e.is_emergency_vault) ?? null;
+      const vaultBalance = vaultEnvelope ? Number(vaultEnvelope.balance) : 0;
+      const totalInEnvelopes = envelopes
+        .filter((e) => !e.is_emergency_vault)
+        .reduce((s, e) => s + Number(e.balance), 0);
 
-  const doReset = useCallback(() => {
-    const fresh = resetAccount();
-    setAccount(fresh);
-  }, []);
+      setState({
+        wallet: walletRes,
+        envelopes,
+        transactions: txRes.transactions,
+        balances: balancesRes.balances,
+        notifications: notifRes.notifications,
+        unreadCount: notifRes.unread_count,
+        userProfile: null, // fetched lazily in profile pages
+        availableBalance: Number(walletRes.balance),
+        totalInEnvelopes,
+        vaultBalance,
+        vaultEnvelope,
+      });
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Failed to load data. Please refresh the page.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [clerkLoaded, isSignedIn, getToken]);
 
-  const refreshStatuses = useCallback(() => {
-    mutate((prev) => ({
-      ...prev,
-      envelopes: prev.envelopes.map((e) => ({
-        ...e,
-        status: computeEnvelopeStatus(e),
-      })),
-    }));
-  }, [mutate]);
+  /** Lightweight notification-only refresh used by the notifications page */
+  const refreshNotifications = useCallback(async () => {
+    if (!clerkLoaded || !isSignedIn) return;
+    try {
+      const token = () => getToken();
+      const notifRes = await notificationApi.list(token, { limit: 50 });
+      setState((prev) => ({
+        ...prev,
+        notifications: notifRes.notifications,
+        unreadCount: notifRes.unread_count,
+      }));
+    } catch {
+      // non-fatal — don't surface a global error for badge refresh
+    }
+  }, [clerkLoaded, isSignedIn, getToken]);
 
-  // Show an animated splash screen until hydrated to avoid SSR mismatch
-  if (isLoading || !account) {
+  // Initial load
+  useEffect(() => {
+    if (clerkLoaded && isSignedIn) {
+      setIsLoading(true);
+      fetchAll();
+    } else if (clerkLoaded && !isSignedIn) {
+      setIsLoading(false);
+    }
+  }, [clerkLoaded, isSignedIn, fetchAll]);
+
+  const refresh = useCallback(async () => {
+    setIsMutating(true);
+    try {
+      await fetchAll();
+    } finally {
+      setIsMutating(false);
+    }
+  }, [fetchAll]);
+
+  const clearError = useCallback(() => setError(null), []);
+
+  // ── Loading splash ───────────────────────────────────────
+  // Show the splash whenever:
+  //   1. Clerk hasn't initialised yet (SSR / first paint)
+  //   2. User is signed in but we don't have wallet data yet
+  //      (still fetching OR fetch failed before wallet was populated)
+  // We deliberately do NOT show the splash when the user is not signed in —
+  // the Clerk middleware will redirect them to /sign-in before any app page
+  // is served, so that case is handled externally.
+
+  const waitingForData = isSignedIn && !state.wallet;
+  if (!clerkLoaded || waitingForData) {
+    // If we have an error and no wallet data, show an error screen instead
+    // of spinning forever so users know the backend is unreachable.
+    if (clerkLoaded && isSignedIn && !isLoading && error) {
+      return (
+        <div className="min-h-screen bg-[#0e0e0e] flex flex-col items-center justify-center gap-6 px-6 text-center">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+            style={{ background: "rgba(255,180,171,0.12)", border: "1px solid rgba(255,180,171,0.25)" }}>
+            <span className="text-[22px]">⚠</span>
+          </div>
+          <div className="flex flex-col gap-2">
+            <h2 className="text-white font-semibold text-lg" style={{ fontFamily: "Geist, sans-serif" }}>
+              Could not load your wallet
+            </h2>
+            <p className="text-[13px] max-w-xs" style={{ color: "#b5b5b5" }}>{error}</p>
+          </div>
+          <button
+            onClick={() => { clearError(); fetchAll(); }}
+            className="px-5 py-2.5 rounded-lg font-semibold text-sm transition-colors"
+            style={{ background: "#BEF532", color: "#000" }}
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen bg-[#0e0e0e] flex flex-col items-center justify-center gap-8 px-6">
-
-        {/* ── Logo with pulse ring ── */}
         <div className="relative flex items-center justify-center">
-          {/* Outer pulse ring */}
           <span className="absolute w-32 h-32 rounded-full border border-[#BEF532]/20 animate-ping" />
-          {/* Mid ring */}
           <span className="absolute w-24 h-24 rounded-full border border-[#BEF532]/10" />
-          {/* Logo container */}
           <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(190,245,50,0.15)]">
             <Image
               src="/WiseHaven Logo.jpg"
@@ -173,52 +248,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
             />
           </div>
         </div>
-
-        {/* ── Brand name ── */}
         <div className="flex flex-col items-center gap-1.5">
-          <h1 className="text-white font-bold text-2xl tracking-tight"
-              style={{ fontFamily: "Geist, Inter, sans-serif" }}>
+          <h1 className="text-white font-bold text-2xl tracking-tight" style={{ fontFamily: "Geist, Inter, sans-serif" }}>
             WiseHaven
           </h1>
-          <p className="text-[#8D937B] text-xs uppercase tracking-[0.2em]"
-             style={{ fontFamily: "Inter, sans-serif" }}>
+          <p className="text-[#8D937B] text-xs uppercase tracking-[0.2em]" style={{ fontFamily: "Inter, sans-serif" }}>
             Give Every Franc a Purpose
           </p>
         </div>
-
-        {/* ── Progress bar ── */}
         <div className="w-48 h-0.5 rounded-full bg-[#201f1f] overflow-hidden">
           <div className="h-full bg-[#BEF532] rounded-full origin-left animate-[loading-bar_1.4s_ease-in-out_infinite]" />
         </div>
-
-        {/* ── Status label ── */}
-        <p className="text-[#8D937B] text-[11px] uppercase tracking-[0.18em]"
-           style={{ fontFamily: "Inter, sans-serif" }}>
-          Initialising secure wallet…
+        <p className="text-[#8D937B] text-[11px] uppercase tracking-[0.18em]" style={{ fontFamily: "Inter, sans-serif" }}>
+          Loading your demo wallet…
         </p>
-
       </div>
     );
   }
 
-  const availableFunds = computeAvailableFunds(account);
-  const lockedTotal = computeLockedTotal(account);
-
   return (
     <AppContext.Provider
       value={{
-        account,
-        availableFunds,
-        lockedTotal,
+        state,
         isLoading,
-        privacyMode: account.privacyMode,
+        isMutating,
+        error,
+        privacyMode,
         togglePrivacyMode,
-        doDeposit,
-        doAllocateEnvelope,
-        doConfirmPayment,
-        doUpdateVaultSettings,
-        doReset,
-        refreshStatuses,
+        refresh,
+        refreshNotifications,
+        clearError,
       }}
     >
       {children}
@@ -230,8 +289,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
 export function useApp(): AppContextValue {
   const ctx = useContext(AppContext);
-  if (!ctx) {
-    throw new Error("useApp must be used within AppProvider");
+  if (!ctx) throw new Error("useApp must be used within AppProvider");
+  // Guard: ensure state is never undefined (defensive against hot-reload
+  // or SSR hydration edge cases where context value may be partially stale)
+  if (ctx.state === undefined) {
+    return { ...ctx, state: EMPTY_STATE };
   }
   return ctx;
 }

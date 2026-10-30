@@ -1,9 +1,9 @@
-import { AppProvider } from "@/context/AppContext";
+import Providers from "./Providers";
 
 export default function AppGroupLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <AppProvider>{children}</AppProvider>;
+  return <Providers>{children}</Providers>;
 }

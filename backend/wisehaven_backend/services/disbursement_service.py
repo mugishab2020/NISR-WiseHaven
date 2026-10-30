@@ -1,10 +1,19 @@
-"""Disbursement service for payments and withdrawals."""
+"""Disbursement service for payments and withdrawals.
+
+All disbursements are simulated demo operations.
+No real money is transferred to any payee or external account.
+"""
 
 from decimal import Decimal
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from prisma import Prisma
 from services.lock_service import LockService
 from services.transaction_service import TransactionService
+
+
+def _utcnow() -> datetime:
+    """Return current UTC time with timezone info."""
+    return datetime.now(timezone.utc)
 
 
 class DisbursementService:
@@ -133,39 +142,33 @@ class DisbursementService:
         user_id: str,
         amount: Decimal,
         justification: str,
-        password: str
+        password: str | None = None,
     ) -> dict:
         """Create emergency vault withdrawal request.
-        
+
+        Authentication is handled by Clerk — no local password check is performed.
+        The two-step safety mechanism is the 24-hour cooling-off period.
+
         Args:
             user_id: User's ID
             amount: Withdrawal amount
             justification: Reason for emergency withdrawal (10-500 chars)
-            password: User's password for re-authentication
-            
+            password: Ignored (Clerk handles authentication)
+
         Returns:
             Emergency withdrawal request details
-            
+
         Raises:
             ValueError if validation fails
         """
         # Validate justification length
         if len(justification) < 10 or len(justification) > 500:
             raise ValueError("Justification must be 10-500 characters")
-        
-        # Get user for password verification
-        from services.auth_service import AuthService
-        auth_service = AuthService(self.db)
-        
+
         user = await self.db.user.find_unique(where={"id": user_id})
         if not user:
             raise ValueError("User not found")
-        
-        # Verify password
-        from utils.security import verify_password
-        if not verify_password(password, user.password_hash):
-            raise ValueError("Invalid password")
-        
+
         # Get Emergency Vault
         emergency_vault = await self.db.envelope.find_first(
             where={"user_id": user_id, "is_emergency_vault": True}
@@ -199,7 +202,7 @@ class DisbursementService:
         )
         
         # Calculate approval timestamp (24 hours from now)
-        approval_timestamp = datetime.utcnow() + timedelta(hours=24)
+        approval_timestamp = _utcnow() + timedelta(hours=24)
         
         return {
             "request_id": request.id,
@@ -241,8 +244,8 @@ class DisbursementService:
         
         # Check cooling-off period (24 hours)
         cooling_off_end = request.requested_at + timedelta(hours=24)
-        if datetime.utcnow() < cooling_off_end:
-            remaining = cooling_off_end - datetime.utcnow()
+        if _utcnow() < cooling_off_end:
+            remaining = cooling_off_end - _utcnow()
             hours = int(remaining.total_seconds() / 3600)
             minutes = int((remaining.total_seconds() % 3600) / 60)
             raise ValueError(f"Cooling-off period not complete. Please wait {hours}h {minutes}m")
@@ -277,7 +280,7 @@ class DisbursementService:
             where={"id": request_id},
             data={
                 "status": "APPROVED",
-                "approved_at": datetime.utcnow()
+                "approved_at": _utcnow()
             }
         )
         
@@ -289,7 +292,7 @@ class DisbursementService:
             "new_balance": new_balance,
             "justification": request.justification,
             "status": "APPROVED",
-            "approved_at": datetime.utcnow()
+            "approved_at": _utcnow()
         }
     
     async def get_emergency_withdrawal_requests(self, user_id: str) -> list[dict]:
@@ -309,7 +312,7 @@ class DisbursementService:
         result = []
         for req in requests:
             can_approve_at = req.requested_at + timedelta(hours=24)
-            is_ready = datetime.utcnow() >= can_approve_at and req.status == "PENDING"
+            is_ready = _utcnow() >= can_approve_at and req.status == "PENDING"
             
             result.append({
                 "request_id": req.id,

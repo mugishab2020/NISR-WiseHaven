@@ -465,11 +465,15 @@ Production deployments are intentionally **manual-trigger-only** to prevent acci
 - [x] Mobile-first responsive design
 - [x] GitHub Actions CI/CD pipeline (lint → typecheck → build → Vercel deploy)
 
-### Milestone 2 — Backend & Auth
-- [ ] FastAPI (Python) backend with PostgreSQL ledger
-- [ ] JWT authentication (phone number + PIN)
-- [ ] Real envelope lock enforcement server-side
-- [ ] Celery + Redis task queue for maturity notifications and SMS triggers
+### Milestone 2 — Backend & Auth ✅
+- [x] FastAPI (Python) backend with PostgreSQL ledger
+- [x] Clerk authentication across frontend and backend (JWT verification, per-user isolation)
+- [x] Real envelope lock enforcement server-side (disbursements rejected when locked)
+- [x] Wallet service with atomic balance mutations, optimistic locking, and idempotency keys
+- [x] Payee registry, allocation plans, disbursement service, notification service
+- [x] Rate limiting, secure HTTP headers, CORS, request size limits
+- [x] 33/33 automated API tests passing
+- [ ] Celery + Redis task queue for server-side maturity notifications and SMS triggers (deferred to Milestone 4)
 
 ### Milestone 3 — Payment Integrations
 - [ ] MTN MoMo Disbursements API

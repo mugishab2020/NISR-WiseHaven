@@ -27,7 +27,7 @@ class EmergencyWithdrawalRequest(BaseModel):
     """Request schema for emergency vault withdrawal."""
     amount: Decimal = Field(..., gt=0, description="Withdrawal amount")
     justification: str = Field(..., min_length=10, max_length=500, description="Reason for withdrawal")
-    password: str = Field(..., description="Password for re-authentication")
+    password: str | None = Field(None, description="Ignored — authentication handled by Clerk")
     
     @field_validator('amount')
     @classmethod

@@ -1,10 +1,12 @@
 """Envelope management controller."""
 
+from decimal import Decimal
 from fastapi import APIRouter, HTTPException, status, Depends
 from models import get_db
 from prisma import Prisma
 from services.envelope_service import EnvelopeService
 from services.lock_service import LockService
+from services.transaction_service import TransactionService
 from utils.dependencies import get_current_user_id
 from views.envelope_schemas import (
     EnvelopeCreateRequest,
@@ -12,7 +14,9 @@ from views.envelope_schemas import (
     EnvelopeResponse,
     EnvelopeListResponse,
     TemporalLockRequest,
-    TemporalLockResponse
+    TemporalLockResponse,
+    FundEnvelopeRequest,
+    FundEnvelopeResponse,
 )
 
 router = APIRouter(prefix="/envelopes", tags=["Envelopes"])
@@ -180,3 +184,85 @@ async def create_temporal_lock(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create temporal lock: {str(e)}"
         )
+
+
+@router.post("/{envelope_id}/fund", response_model=FundEnvelopeResponse, status_code=status.HTTP_200_OK)
+async def fund_envelope(
+    envelope_id: str,
+    request: FundEnvelopeRequest,
+    user_id: str = Depends(get_current_user_id),
+    db: Prisma = Depends(get_db)
+):
+    """Allocate funds from wallet into an envelope.
+
+    Atomically:
+    - Debits the requested amount from the user's wallet balance
+    - Credits the same amount to the envelope balance
+    - Records a TRANSFER transaction in the ledger
+
+    Rejects if:
+    - Envelope does not exist or belongs to another user
+    - Wallet balance is insufficient
+    - Amount is zero or negative
+    """
+    amount = Decimal(str(request.amount))
+
+    # --- verify envelope ownership ---
+    envelope = await db.envelope.find_first(
+        where={"id": envelope_id, "user_id": user_id}
+    )
+    if not envelope:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Envelope not found"
+        )
+
+    # --- verify wallet has enough funds ---
+    wallet = await db.wallet.find_unique(where={"user_id": user_id})
+    if not wallet:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Wallet not found"
+        )
+    if wallet.balance < amount:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Insufficient wallet balance. Available: {wallet.balance}, Requested: {amount}"
+        )
+
+    # --- atomic debit wallet + credit envelope ---
+    new_wallet_balance = wallet.balance - amount
+    await db.wallet.update(
+        where={"id": wallet.id},
+        data={
+            "balance": new_wallet_balance,
+            "total_allocated": wallet.total_allocated + amount,
+            "version": {"increment": 1},
+        }
+    )
+
+    new_envelope_balance = envelope.balance + amount
+    await db.envelope.update(
+        where={"id": envelope_id},
+        data={"balance": new_envelope_balance}
+    )
+
+    # --- ledger entry ---
+    description = request.description or f"Allocated to {envelope.name}"
+    transaction_service = TransactionService(db)
+    tx = await transaction_service.create_transaction(
+        user_id=user_id,
+        transaction_type="TRANSFER",
+        amount=amount,
+        description=description,
+        envelope_id=envelope_id,
+    )
+
+    return FundEnvelopeResponse(
+        envelope_id=envelope_id,
+        envelope_name=envelope.name,
+        amount=amount,
+        new_envelope_balance=new_envelope_balance,
+        new_wallet_balance=new_wallet_balance,
+        transaction_id=tx["id"],
+    )

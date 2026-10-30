@@ -13,6 +13,6 @@ echo "==> Fetching Prisma query engine binaries..."
 prisma py fetch
 
 echo "==> Verifying binary exists..."
-python -c "from prisma import Prisma; print('Prisma client loaded successfully')"
+python -c "from prisma import Prisma; assert hasattr(Prisma(), 'transaction'); print('Generated Prisma transaction client loaded successfully')"
 
 echo "==> Build complete!"

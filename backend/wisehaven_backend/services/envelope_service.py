@@ -1,8 +1,12 @@
 """Envelope management service."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from prisma import Prisma
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 class EnvelopeService:
@@ -73,7 +77,7 @@ class EnvelopeService:
             temporal_lock = None
             if envelope.temporal_lock:
                 lock = envelope.temporal_lock
-                status = "LOCKED" if lock.maturity_timestamp > datetime.utcnow() else "RELEASED"
+                status = "LOCKED" if lock.maturity_timestamp > _utcnow() else "RELEASED"
                 temporal_lock = {
                     "id": lock.id,
                     "envelope_id": lock.envelope_id,
@@ -148,7 +152,7 @@ class EnvelopeService:
         temporal_lock = None
         if updated.temporal_lock:
             lock = updated.temporal_lock
-            status = "LOCKED" if lock.maturity_timestamp > datetime.utcnow() else "RELEASED"
+            status = "LOCKED" if lock.maturity_timestamp > _utcnow() else "RELEASED"
             temporal_lock = {
                 "id": lock.id,
                 "envelope_id": lock.envelope_id,

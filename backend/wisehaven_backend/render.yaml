@@ -4,13 +4,13 @@ services:
     env: python
     region: oregon
     rootDir: backend/wisehaven_backend
-    buildCommand: pip install -r requirements.txt && prisma generate --schema models/schema.prisma && prisma py fetch
+    buildCommand: bash render-build.sh
     startCommand: bash start-server.sh
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.11
       - key: DATABASE_URL
-        value: postgresql://root:aeadJb1EKAUSszei21ZwMRiWolzNxwXi@dpg-dbga6d1srm7s73cvg0ig-a/wisehaven_bwgk
+        sync: false
       - key: CLERK_SECRET_KEY
         sync: false
       - key: ENVIRONMENT

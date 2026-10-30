@@ -19,10 +19,11 @@ class WalletResponse(BaseModel):
 
 
 class AddFundsRequest(BaseModel):
-    """Request schema for adding simulated funds (dev/test only)."""
+    """Request schema for adding simulated demo funds."""
     amount: Decimal = Field(..., description="Amount to add to wallet (positive value)")
-    description: str = Field(default="Simulated deposit", description="Description of the deposit")
-    
+    description: str = Field(default="Demo deposit", description="Description of the deposit")
+    idempotency_key: str | None = Field(None, description="Optional client-supplied idempotency key to prevent duplicate credits")
+
     @field_validator('amount')
     @classmethod
     def validate_amount(cls, v):
