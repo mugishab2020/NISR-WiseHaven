@@ -125,17 +125,28 @@ export interface TemporalLockResponse {
   created_at: string;
 }
 
+export interface AllowanceScheduleResponse {
+  id: string;
+  envelope_id: string;
+  release_amount: number;
+  frequency: "DAILY" | "WEEKLY";
+  next_release_at: string;
+  is_active: boolean;
+}
+
 export interface EnvelopeResponse {
   id: string;
   name: string;
   category: string;
   description: string | null;
   balance: number;
+  locked_balance: number;
   is_active: boolean;
   is_emergency_vault: boolean;
   created_at: string;
   updated_at: string;
   temporal_lock: TemporalLockResponse | null;
+  allowance_schedule: AllowanceScheduleResponse | null;
 }
 
 export interface EnvelopeListResponse {
@@ -329,6 +340,22 @@ export const envelopeApi = {
       `/envelopes/${envelopeId}/lock`,
       getToken,
       { maturity_timestamp: maturityTimestamp },
+    ),
+
+  createAllowance: (
+    getToken: GetToken,
+    envelopeId: string,
+    data: {
+      release_amount: number;
+      frequency: "DAILY" | "WEEKLY";
+      first_release_at: string;
+    },
+  ) =>
+    request<AllowanceScheduleResponse>(
+      "POST",
+      `/envelopes/${envelopeId}/allowance`,
+      getToken,
+      data,
     ),
 
   /** Allocate funds from the wallet into an envelope */

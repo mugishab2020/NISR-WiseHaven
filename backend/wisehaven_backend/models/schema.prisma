@@ -56,6 +56,7 @@ model Envelope {
   category           String
   description        String?
   balance            Decimal  @default(0) @db.Decimal(15, 2)
+  locked_balance     Decimal  @default(0) @db.Decimal(15, 2)
   is_active          Boolean  @default(true)
   is_emergency_vault Boolean  @default(false)
   created_at         DateTime @default(now())
@@ -63,12 +64,43 @@ model Envelope {
 
   user               User                 @relation(fields: [user_id], references: [id])
   temporal_lock      TemporalLock?
+  allowance_schedule AllowanceSchedule?
   transactions       Transaction[]
   payees             PayeeEnvelope[]
   allocation_items   AllocationPlanItem[]
 
   @@index([user_id, is_active])
   @@index([user_id, is_emergency_vault])
+}
+
+model AllowanceSchedule {
+  id               String   @id @default(uuid())
+  envelope_id      String   @unique
+  release_amount   Decimal  @db.Decimal(15, 2)
+  frequency        String
+  next_release_at  DateTime
+  is_active        Boolean  @default(true)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  envelope Envelope          @relation(fields: [envelope_id], references: [id], onDelete: Cascade)
+  releases AllowanceRelease[]
+
+  @@index([is_active, next_release_at])
+}
+
+model AllowanceRelease {
+  id             String   @id @default(uuid())
+  schedule_id    String
+  transaction_id String   @unique
+  scheduled_for  DateTime
+  amount         Decimal  @db.Decimal(15, 2)
+  created_at     DateTime @default(now())
+
+  schedule AllowanceSchedule @relation(fields: [schedule_id], references: [id], onDelete: Cascade)
+
+  @@unique([schedule_id, scheduled_for])
+  @@index([scheduled_for])
 }
 
 model TemporalLock {

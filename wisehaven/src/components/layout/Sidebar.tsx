@@ -38,7 +38,7 @@ export default function Sidebar() {
   return (
     <aside
       className="fixed left-0 h-full w-64 z-50 flex flex-col justify-between py-6"
-      style={{ top: "32px", background: "#101010", borderRight: "1px solid #242424" }}
+      style={{ top: "0", background: "#101010", borderRight: "1px solid #242424" }}
     >
       <div className="flex flex-col gap-6">
         {/* Brand */}

@@ -1,3 +1,5 @@
+import asyncio
+import logging
 import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Response
@@ -9,7 +11,7 @@ from slowapi.errors import RateLimitExceeded
 from dotenv import load_dotenv
 
 # Import database
-from models import connect_db, disconnect_db
+from models import connect_db, db, disconnect_db
 
 # Import controllers
 from controllers.user_controller import router as user_router
@@ -20,8 +22,10 @@ from controllers.transaction_controller import router as transaction_router
 from controllers.payee_controller import router as payee_router
 from controllers.disbursement_controller import router as disbursement_router
 from controllers.notification_controller import router as notification_router
+from services.allowance_service import AllowanceService
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 # ── Rate limiter ──────────────────────────────────────────────────────────────
 # Key function: prefer authenticated user ID (from Bearer sub claim) so that
@@ -59,9 +63,29 @@ async def lifespan(app: FastAPI):
     """Manage application lifespan - startup and shutdown events."""
     await connect_db()
     print("✅ Connected to database")
-    yield
-    await disconnect_db()
-    print("👋 Disconnected from database")
+    allowance_task = asyncio.create_task(_run_allowance_scheduler())
+    try:
+        yield
+    finally:
+        allowance_task.cancel()
+        try:
+            await allowance_task
+        except asyncio.CancelledError:
+            pass
+        await disconnect_db()
+        print("👋 Disconnected from database")
+
+
+async def _run_allowance_scheduler():
+    """Release due allowances while the local/API process is running."""
+    while True:
+        try:
+            count = await AllowanceService(db).release_due()
+            if count:
+                logger.info("Released %s scheduled envelope allowance(s)", count)
+        except Exception:
+            logger.exception("Allowance scheduler iteration failed")
+        await asyncio.sleep(30)
 
 
 app = FastAPI(
@@ -143,16 +167,6 @@ _raw_origins = os.getenv(
 )
 ALLOWED_ORIGINS: list[str] = [o.strip() for o in _raw_origins.split(",") if o.strip()]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "Accept"],
-    max_age=600,
-)
-
-
 # Register routers
 app.include_router(user_router)
 app.include_router(wallet_router)
@@ -197,6 +211,21 @@ async def root():
             "demo": "All financial operations use simulated demo money only",
         },
     }
+
+
+# Keep CORS outside FastAPI's server-error middleware so unhandled 500 responses
+# still carry Access-Control-Allow-Origin and expose the actual backend error.
+fastapi_app = app
+app = CORSMiddleware(
+    app=fastapi_app,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
+    max_age=600,
+)
+# Preserve FastAPI state access used by the rate limiter and integrations.
+app.state = fastapi_app.state
 
 
 if __name__ == "__main__":

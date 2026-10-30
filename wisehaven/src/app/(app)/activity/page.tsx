@@ -15,6 +15,7 @@ const TX_META: Record<string, { label: string; direction: "in" | "out" | "neutra
   ALLOCATION:     { label: "Allocated",      direction: "out",     icon: Lock           },
   DEBIT:          { label: "Simulated Pay",  direction: "out",     icon: CheckCircle    },
   DEPOSIT:        { label: "Demo Deposit",   direction: "in",      icon: ArrowDownRight },
+  ALLOWANCE_RELEASE: { label: "Allowance Released", direction: "neutral", icon: Lock },
 };
 
 const FILTER_OPTIONS = [

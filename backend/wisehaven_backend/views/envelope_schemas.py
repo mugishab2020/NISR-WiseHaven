@@ -1,7 +1,8 @@
 """Envelope request/response schemas."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
+from typing import Literal
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -77,6 +78,30 @@ class TemporalLockResponse(BaseModel):
     created_at: datetime
 
 
+class AllowanceScheduleRequest(BaseModel):
+    release_amount: Decimal = Field(..., gt=0)
+    frequency: Literal["DAILY", "WEEKLY"]
+    first_release_at: datetime
+
+    @field_validator("first_release_at")
+    @classmethod
+    def validate_first_release(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        if value <= datetime.now(timezone.utc):
+            raise ValueError("First release must be in the future")
+        return value
+
+
+class AllowanceScheduleResponse(BaseModel):
+    id: str
+    envelope_id: str
+    release_amount: Decimal
+    frequency: Literal["DAILY", "WEEKLY"]
+    next_release_at: datetime
+    is_active: bool
+
+
 class EnvelopeResponse(BaseModel):
     """Response schema for envelope."""
     id: str
@@ -84,11 +109,13 @@ class EnvelopeResponse(BaseModel):
     category: str
     description: str | None
     balance: Decimal
+    locked_balance: Decimal = Decimal("0.00")
     is_active: bool
     is_emergency_vault: bool
     created_at: datetime
     updated_at: datetime
     temporal_lock: TemporalLockResponse | None = None
+    allowance_schedule: AllowanceScheduleResponse | None = None
 
 
 class EnvelopeListResponse(BaseModel):

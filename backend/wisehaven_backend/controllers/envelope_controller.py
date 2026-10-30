@@ -17,9 +17,38 @@ from views.envelope_schemas import (
     TemporalLockResponse,
     FundEnvelopeRequest,
     FundEnvelopeResponse,
+    AllowanceScheduleRequest,
+    AllowanceScheduleResponse,
 )
+from services.allowance_service import AllowanceService
 
 router = APIRouter(prefix="/envelopes", tags=["Envelopes"])
+
+
+@router.post("/{envelope_id}/allowance", response_model=AllowanceScheduleResponse, status_code=status.HTTP_201_CREATED)
+async def create_allowance_schedule(
+    envelope_id: str,
+    request: AllowanceScheduleRequest,
+    user_id: str = Depends(get_current_user_id),
+    db: Prisma = Depends(get_db),
+):
+    """Lock the envelope's remaining funds and release a daily/weekly amount."""
+    try:
+        schedule = await AllowanceService(db).create_schedule(
+            envelope_id=envelope_id,
+            user_id=user_id,
+            release_amount=request.release_amount,
+            frequency=request.frequency,
+            first_release_at=request.first_release_at,
+        )
+        return AllowanceScheduleResponse(**schedule)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create allowance schedule: {str(e)}",
+        )
 
 
 @router.get("", response_model=EnvelopeListResponse)
@@ -207,56 +236,66 @@ async def fund_envelope(
     """
     amount = Decimal(str(request.amount))
 
-    # --- verify envelope ownership ---
-    envelope = await db.envelope.find_first(
-        where={"id": envelope_id, "user_id": user_id}
-    )
-    if not envelope:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Envelope not found"
+    # Keep both balance changes and the ledger write in one transaction. A
+    # rejected transaction input must never leave balances changed without an
+    # audit record.
+    async with db.tx() as transaction_db:
+        envelope = await transaction_db.envelope.find_first(
+            where={"id": envelope_id, "user_id": user_id}
+        )
+        if not envelope:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Envelope not found"
+            )
+
+        wallet = await transaction_db.wallet.find_unique(where={"user_id": user_id})
+        if not wallet:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Wallet not found"
+            )
+        if wallet.balance < amount:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Insufficient wallet balance. Available: {wallet.balance}, Requested: {amount}"
+            )
+
+        debited = await transaction_db.wallet.update_many(
+            where={
+                "id": wallet.id,
+                "version": wallet.version,
+                "balance": {"gte": amount},
+            },
+            data={
+                "balance": {"decrement": amount},
+                "total_allocated": {"increment": amount},
+                "version": {"increment": 1},
+            },
+        )
+        if debited != 1:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Wallet changed while allocating funds. Please try again."
+            )
+
+        updated_envelope = await transaction_db.envelope.update(
+            where={"id": envelope_id},
+            data={"balance": {"increment": amount}},
         )
 
-    # --- verify wallet has enough funds ---
-    wallet = await db.wallet.find_unique(where={"user_id": user_id})
-    if not wallet:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Wallet not found"
-        )
-    if wallet.balance < amount:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Insufficient wallet balance. Available: {wallet.balance}, Requested: {amount}"
+        description = request.description or f"Allocated to {envelope.name}"
+        transaction_service = TransactionService(transaction_db)
+        tx = await transaction_service.create_transaction(
+            user_id=user_id,
+            transaction_type="TRANSFER",
+            amount=amount,
+            description=description,
+            envelope_id=envelope_id,
         )
 
-    # --- atomic debit wallet + credit envelope ---
-    new_wallet_balance = wallet.balance - amount
-    await db.wallet.update(
-        where={"id": wallet.id},
-        data={
-            "balance": new_wallet_balance,
-            "total_allocated": wallet.total_allocated + amount,
-            "version": {"increment": 1},
-        }
-    )
-
-    new_envelope_balance = envelope.balance + amount
-    await db.envelope.update(
-        where={"id": envelope_id},
-        data={"balance": new_envelope_balance}
-    )
-
-    # --- ledger entry ---
-    description = request.description or f"Allocated to {envelope.name}"
-    transaction_service = TransactionService(db)
-    tx = await transaction_service.create_transaction(
-        user_id=user_id,
-        transaction_type="TRANSFER",
-        amount=amount,
-        description=description,
-        envelope_id=envelope_id,
-    )
+        new_wallet_balance = wallet.balance - amount
+        new_envelope_balance = updated_envelope.balance
 
     return FundEnvelopeResponse(
         envelope_id=envelope_id,

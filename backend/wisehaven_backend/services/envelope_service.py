@@ -3,6 +3,7 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 from prisma import Prisma
+from services.allowance_service import AllowanceService
 
 
 def _utcnow() -> datetime:
@@ -40,6 +41,7 @@ class EnvelopeService:
                 "category": category,
                 "description": description,
                 "balance": Decimal("0.00"),
+                "locked_balance": Decimal("0.00"),
                 "is_active": True,
                 "is_emergency_vault": False
             }
@@ -51,11 +53,13 @@ class EnvelopeService:
             "category": envelope.category,
             "description": envelope.description,
             "balance": envelope.balance,
+            "locked_balance": envelope.locked_balance,
             "is_active": envelope.is_active,
             "is_emergency_vault": envelope.is_emergency_vault,
             "created_at": envelope.created_at,
             "updated_at": envelope.updated_at,
-            "temporal_lock": None
+            "temporal_lock": None,
+            "allowance_schedule": None,
         }
     
     async def get_user_envelopes(self, user_id: str) -> list[dict]:
@@ -67,9 +71,10 @@ class EnvelopeService:
         Returns:
             List of envelopes with temporal lock status
         """
+        await AllowanceService(self.db).release_due(user_id)
         envelopes = await self.db.envelope.find_many(
             where={"user_id": user_id},
-            include={"temporal_lock": True}
+            include={"temporal_lock": True, "allowance_schedule": True}
         )
         
         result = []
@@ -85,6 +90,10 @@ class EnvelopeService:
                     "status": status,
                     "created_at": lock.created_at
                 }
+
+            allowance_schedule = None
+            if envelope.allowance_schedule:
+                allowance_schedule = AllowanceService._format_schedule(envelope.allowance_schedule)
             
             result.append({
                 "id": envelope.id,
@@ -92,11 +101,13 @@ class EnvelopeService:
                 "category": envelope.category,
                 "description": envelope.description,
                 "balance": envelope.balance,
+                "locked_balance": envelope.locked_balance,
                 "is_active": envelope.is_active,
                 "is_emergency_vault": envelope.is_emergency_vault,
                 "created_at": envelope.created_at,
                 "updated_at": envelope.updated_at,
-                "temporal_lock": temporal_lock
+                "temporal_lock": temporal_lock,
+                "allowance_schedule": allowance_schedule,
             })
         
         return result
@@ -146,7 +157,7 @@ class EnvelopeService:
         updated = await self.db.envelope.update(
             where={"id": envelope_id},
             data=update_data,
-            include={"temporal_lock": True}
+            include={"temporal_lock": True, "allowance_schedule": True}
         )
         
         temporal_lock = None
@@ -161,17 +172,23 @@ class EnvelopeService:
                 "created_at": lock.created_at
             }
         
+        allowance_schedule = None
+        if updated.allowance_schedule:
+            allowance_schedule = AllowanceService._format_schedule(updated.allowance_schedule)
+
         return {
             "id": updated.id,
             "name": updated.name,
             "category": updated.category,
             "description": updated.description,
             "balance": updated.balance,
+            "locked_balance": updated.locked_balance,
             "is_active": updated.is_active,
             "is_emergency_vault": updated.is_emergency_vault,
             "created_at": updated.created_at,
             "updated_at": updated.updated_at,
-            "temporal_lock": temporal_lock
+            "temporal_lock": temporal_lock,
+            "allowance_schedule": allowance_schedule,
         }
     
     async def get_emergency_vault(self, user_id: str) -> dict | None:

@@ -39,18 +39,22 @@ class TransactionService:
         Returns:
             Created transaction info
         """
-        # Prisma's generated Python create input expects a nested user relation,
-        # and JSON values must be explicitly wrapped with Prisma's Json type.
+        # Prisma's checked create input accepts relation connections, while the
+        # foreign-key scalar fields (user_id, envelope_id, payee_id) belong to
+        # its unchecked input. Do not mix the two input shapes.
         create_data: dict = {
             "user": {"connect": {"id": user_id}},
             "transaction_type": transaction_type,
             "amount": amount,
             "description": description,
         }
-        if envelope_id  is not None: create_data["envelope_id"]  = envelope_id
-        if payee_id     is not None: create_data["payee_id"]     = payee_id
+        if envelope_id is not None:
+            create_data["envelope"] = {"connect": {"id": envelope_id}}
+        if payee_id is not None:
+            create_data["payee"] = {"connect": {"id": payee_id}}
         if source_id    is not None: create_data["source_id"]    = source_id
         if destination_id is not None: create_data["destination_id"] = destination_id
+        # JSON values must be explicitly wrapped with Prisma's Json type.
         if metadata     is not None: create_data["metadata"]     = Json(metadata)
 
         transaction = await self.db.transaction.create(data=create_data)

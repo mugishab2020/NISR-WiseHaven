@@ -69,7 +69,7 @@ export default function EnvelopesPage() {
     return matchFilter && matchSearch;
   });
 
-  const totalInEnvelopes = envelopes.reduce((s, e) => s + Number(e.balance), 0);
+  const totalInEnvelopes = envelopes.reduce((s, e) => s + Number(e.balance) + Number(e.locked_balance ?? 0), 0);
 
   return (
     <AppShell>
@@ -99,9 +99,9 @@ export default function EnvelopesPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             { label: "In Envelopes", value: totalInEnvelopes, count: `${envelopes.length} active`, icon: Wallet },
-            { label: "Locked",       value: locked.reduce((s,e)=>s+Number(e.balance),0),  count: `${locked.length} envelopes`,  icon: Lock },
+            { label: "Locked",       value: envelopes.reduce((s,e)=>s+Number(e.locked_balance ?? 0)+(e.temporal_lock?.status === "LOCKED" ? Number(e.balance) : 0),0),  count: `${locked.length + envelopes.filter((e) => Number(e.locked_balance ?? 0) > 0).length} envelopes`,  icon: Lock },
             { label: "Ready to Pay", value: released.reduce((s,e)=>s+Number(e.balance),0), count: released.length > 0 ? "Confirm payment" : "All secured", icon: ArrowRight },
-            { label: "No Lock",      value: noLock.reduce((s,e)=>s+Number(e.balance),0),  count: `${noLock.length} unlocked`, icon: Wallet },
+            { label: "Available Now", value: envelopes.filter((e) => e.temporal_lock?.status !== "LOCKED").reduce((s,e)=>s+Number(e.balance),0), count: `${noLock.length} envelopes`, icon: Wallet },
           ].map(({ label, value, count, icon: Icon }) => (
             <div key={label} className="p-4 rounded-xl flex flex-col gap-2" style={CARD}>
               <div className="flex items-center justify-between">
@@ -177,14 +177,28 @@ export default function EnvelopesPage() {
                           style={isLocked ? { background: "rgba(190,245,50,0.08)", color: "#bef532" } : { background: "#bef532", color: "#000" }}>
                           {isLocked ? "Locked" : "Ready"}
                         </span>
+                      ) : envelope.allowance_schedule ? (
+                        <span className="px-2 py-0.5 rounded-full font-label-sm text-label-sm font-semibold" style={{ background: "rgba(190,245,50,0.08)", color: "#bef532" }}>
+                          {envelope.allowance_schedule.frequency === "DAILY" ? "Daily allowance" : "Weekly allowance"}
+                        </span>
                       ) : (
                         <span className="px-2 py-0.5 rounded-full font-label-sm text-label-sm" style={{ background: "#202020", color: "#808080" }}>No lock</span>
                       )}
                     </div>
 
                     <div>
-                      <span className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>Balance</span>
+                      <span className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>Available</span>
                       <div className="mt-1"><CurrencyDisplay amount={Number(envelope.balance)} size="lg" /></div>
+                      {Number(envelope.locked_balance) > 0 && (
+                        <p className="font-body-sm text-body-sm mt-1" style={{ color: "#808080" }}>
+                          {formatRWF(Number(envelope.locked_balance))} RWF still locked
+                        </p>
+                      )}
+                      {envelope.allowance_schedule?.is_active && (
+                        <p className="font-body-sm text-body-sm mt-1" style={{ color: "#bef532" }}>
+                          {formatRWF(Number(envelope.allowance_schedule.release_amount))} RWF next on {new Date(envelope.allowance_schedule.next_release_at).toLocaleString()}
+                        </p>
+                      )}
                     </div>
 
                     {lock && (

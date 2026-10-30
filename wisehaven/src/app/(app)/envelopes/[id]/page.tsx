@@ -71,9 +71,11 @@ export default function EnvelopeDetailPage() {
 
   const Icon = ICON_MAP[envelope.category] ?? Lock;
   const lock = envelope.temporal_lock;
+  const allowance = envelope.allowance_schedule;
   const isLocked   = lock?.status === "LOCKED";
   const isReleased = lock?.status === "RELEASED";
   const balance    = Number(envelope.balance);
+  const lockedBalance = Number(envelope.locked_balance ?? 0);
 
   const accent     = isReleased ? "#bef532" : isLocked ? "#bef532" : "#808080";
   const heroBorder = isReleased ? "rgba(190,245,50,0.25)" : "#242424";
@@ -161,15 +163,35 @@ export default function EnvelopeDetailPage() {
                   style={isLocked ? { background: "rgba(190,245,50,0.08)", color: "#bef532" } : { background: "#bef532", color: "#000" }}>
                   {isLocked ? "Locked" : "Ready to Pay"}
                 </span>
+              ) : allowance ? (
+                <span className="px-2 py-0.5 rounded-full font-label-sm text-label-sm font-semibold" style={{ background: "rgba(190,245,50,0.08)", color: "#bef532" }}>
+                  {allowance.is_active ? `${allowance.frequency === "DAILY" ? "Daily" : "Weekly"} allowance` : "Allowance complete"}
+                </span>
               ) : (
                 <span className="px-2 py-0.5 rounded-full font-label-sm text-label-sm" style={{ background: "#202020", color: "#808080" }}>No lock</span>
               )}
             </div>
 
             <div>
-              <span className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>Demo Balance</span>
+              <span className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>Available to spend</span>
               <div className="mt-1"><CurrencyDisplay amount={balance} size="lg" /></div>
+              {lockedBalance > 0 && (
+                <p className="font-body-sm text-body-sm mt-2" style={{ color: "#808080" }}>
+                  {formatRWF(lockedBalance)} RWF remains locked for future releases
+                </p>
+              )}
             </div>
+
+            {allowance?.is_active && (
+              <div className="rounded-lg p-3" style={{ background: "rgba(190,245,50,0.05)", border: "1px solid rgba(190,245,50,0.15)" }}>
+                <p className="font-body-sm text-body-sm" style={{ color: "#bef532" }}>
+                  {formatRWF(Number(allowance.release_amount))} RWF releases {allowance.frequency.toLowerCase()}.
+                </p>
+                <p className="font-body-sm text-body-sm mt-1" style={{ color: "#808080" }}>
+                  Next release {new Date(allowance.next_release_at).toLocaleString()}.
+                </p>
+              </div>
+            )}
 
             {lock && (
               <div className="flex flex-col gap-2">
@@ -243,7 +265,7 @@ export default function EnvelopeDetailPage() {
 
         {/* Action buttons */}
         <div className="flex flex-col gap-3">
-          {isReleased && balance > 0 && (
+          {!isLocked && balance > 0 && (
             <button onClick={() => setShowConfirm(true)} disabled={isSubmitting}
               className="w-full py-3.5 rounded-lg font-body-md text-body-md font-bold flex items-center justify-center gap-2 transition-opacity hover:opacity-90 disabled:opacity-40"
               style={{ background: "#bef532", color: "#000000" }}>
@@ -260,11 +282,18 @@ export default function EnvelopeDetailPage() {
             </div>
           )}
 
-          {!lock && balance > 0 && (
+          {!lock && !allowance && balance > 0 && (
             <div className="w-full py-3 rounded-lg font-body-md text-body-md flex items-center justify-center gap-2"
               style={{ background: "rgba(190,245,50,0.06)", color: "#bef532", border: "1px solid rgba(190,245,50,0.2)" }}>
               <CheckCircle size={16} />
               No lock — funds are accessible
+            </div>
+          )}
+
+          {allowance && balance <= 0 && lockedBalance > 0 && (
+            <div className="w-full py-3 rounded-lg font-body-md text-body-md flex items-center justify-center gap-2"
+              style={{ background: "#171717", color: "#808080", border: "1px solid #242424" }}>
+              <Lock size={16} /> Waiting for the next allowance release
             </div>
           )}
 

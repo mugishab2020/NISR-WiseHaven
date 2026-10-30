@@ -16,7 +16,7 @@ export default function TopHeader() {
     <header
       className="fixed left-64 right-0 h-14 z-40 flex items-center justify-between px-6"
       style={{
-        top: "32px", // offset below the 32px demo banner
+        top: "0",
         background: "rgba(10,10,10,0.88)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",

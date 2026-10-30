@@ -133,7 +133,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const vaultBalance = vaultEnvelope ? Number(vaultEnvelope.balance) : 0;
       const totalInEnvelopes = envelopes
         .filter((e) => !e.is_emergency_vault)
-        .reduce((s, e) => s + Number(e.balance), 0);
+        .reduce((s, e) => s + Number(e.balance) + Number(e.locked_balance ?? 0), 0);
 
       setState({
         wallet: walletRes,

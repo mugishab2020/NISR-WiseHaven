@@ -3,7 +3,6 @@
 import Sidebar from "./Sidebar";
 import TopHeader from "./TopHeader";
 import BottomNav from "./BottomNav";
-import DemoModeBanner from "@/components/ui/DemoModeBanner";
 import { useApp } from "@/context/AppContext";
 import { AlertCircle, X, RefreshCw } from "lucide-react";
 
@@ -16,12 +15,7 @@ export default function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
-      {/* Demo mode banner — always visible on authenticated pages */}
-      <div className="fixed top-0 left-0 right-0 z-50">
-        <DemoModeBanner />
-      </div>
-
-      {/* Desktop sidebar (offset below banner) */}
+      {/* Desktop sidebar */}
       <div className="hidden lg:block">
         <Sidebar />
       </div>
@@ -35,7 +29,7 @@ export default function AppShell({ children }: AppShellProps) {
       <header
         className="lg:hidden fixed left-0 right-0 z-40 h-14 flex items-center justify-between px-4"
         style={{
-          top: "32px", // below the 32px demo banner
+          top: "0",
           background: "rgba(10,10,10,0.92)",
           backdropFilter: "blur(16px)",
           WebkitBackdropFilter: "blur(16px)",
@@ -105,8 +99,8 @@ export default function AppShell({ children }: AppShellProps) {
         </div>
       )}
 
-      {/* Main content — offset top by banner (≈32px) + header (56px on mobile, 56px desktop) */}
-      <main className="min-h-screen lg:pl-64 lg:pt-[calc(56px+32px)] pt-[calc(56px+32px)] pb-20 lg:pb-0">
+      {/* Main content starts below the 56px app header. */}
+      <main className="min-h-screen lg:pl-64 lg:pt-14 pt-14 pb-20 lg:pb-0">
         <div className="w-full px-4 lg:px-6 py-5 lg:py-6 max-w-[1440px]">
           {/* Loading overlay while refreshing */}
           {isLoading && (

@@ -46,6 +46,12 @@ function defaultMaturity(): string {
   return d.toISOString().slice(0, 16);
 }
 
+function defaultFirstRelease(): string {
+  const d = new Date(Date.now() + 24 * 3600 * 1000);
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 16);
+}
+
 export default function NewEnvelopePage() {
   const router = useRouter();
   const { getToken } = useAuth();
@@ -56,6 +62,9 @@ export default function NewEnvelopePage() {
   const [description, setDescription] = useState("");
   const [category, setCategory]       = useState<EnvelopeCategory | "">("");
   const [maturityDate, setMaturityDate] = useState(defaultMaturity());
+  const [releaseFrequency, setReleaseFrequency] = useState<"NONE" | "DAILY" | "WEEKLY">("NONE");
+  const [releaseAmount, setReleaseAmount] = useState("");
+  const [firstReleaseAt, setFirstReleaseAt] = useState(defaultFirstRelease());
   const [amount, setAmount]           = useState("");
   const [errors, setErrors]           = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,12 +75,25 @@ export default function NewEnvelopePage() {
     const e: Record<string, string> = {};
     if (!name.trim())  e.name = "Name is required";
     if (!category)     e.category = "Category is required";
-    if (!maturityDate) e.maturityDate = "Maturity date is required";
-    else if (new Date(maturityDate).getTime() <= Date.now() + 60000) e.maturityDate = "Maturity date must be at least 1 minute in the future";
+    if (releaseFrequency === "NONE") {
+      if (!maturityDate) e.maturityDate = "Maturity date is required";
+      else if (new Date(maturityDate).getTime() <= Date.now() + 60000) e.maturityDate = "Maturity date must be at least 1 minute in the future";
+    }
     const parsedAmount = parseInt(amount.replace(/,/g, ""), 10);
     if (!amount.trim()) e.amount = "Amount is required";
     else if (isNaN(parsedAmount) || parsedAmount <= 0) e.amount = "Enter a valid amount";
     else if (parsedAmount > availableFunds) e.amount = `Exceeds available balance (${formatRWF(availableFunds)} RWF)`;
+    if (releaseFrequency !== "NONE") {
+      const parsedRelease = parseInt(releaseAmount.replace(/,/g, ""), 10);
+      if (!releaseAmount.trim() || isNaN(parsedRelease) || parsedRelease <= 0) {
+        e.releaseAmount = "Enter a valid release amount";
+      } else if (!isNaN(parsedAmount) && parsedRelease > parsedAmount) {
+        e.releaseAmount = "Release amount cannot exceed the total envelope amount";
+      }
+      if (!firstReleaseAt || new Date(firstReleaseAt).getTime() <= Date.now() + 60000) {
+        e.firstReleaseAt = "Choose a first release time at least 1 minute in the future";
+      }
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -100,12 +122,19 @@ export default function NewEnvelopePage() {
         `Initial allocation — ${name.trim()}`,
       );
 
-      // 3. Create the temporal lock
-      await envelopeApi.createLock(
-        () => getToken(),
-        envelope.id,
-        new Date(maturityDate).toISOString(),
-      );
+      if (releaseFrequency === "NONE") {
+        await envelopeApi.createLock(
+          () => getToken(),
+          envelope.id,
+          new Date(maturityDate).toISOString(),
+        );
+      } else {
+        await envelopeApi.createAllowance(() => getToken(), envelope.id, {
+          release_amount: parseInt(releaseAmount.replace(/,/g, ""), 10),
+          frequency: releaseFrequency,
+          first_release_at: new Date(firstReleaseAt).toISOString(),
+        });
+      }
 
       setSubmitted(true);
       await refresh();
@@ -126,7 +155,7 @@ export default function NewEnvelopePage() {
           </div>
           <div className="text-center">
             <h2 className="font-geist font-semibold text-[20px] text-white">Envelope Created!</h2>
-            <p className="font-body-md text-body-md mt-1" style={{ color: "#b5b5b5" }}>Temporal lock applied. Redirecting…</p>
+            <p className="font-body-md text-body-md mt-1" style={{ color: "#b5b5b5" }}>{releaseFrequency === "NONE" ? "Temporal lock applied." : "Scheduled allowance created."} Redirecting…</p>
           </div>
         </div>
       </AppShell>
@@ -147,10 +176,10 @@ export default function NewEnvelopePage() {
         <div className="flex flex-col gap-1 mb-6">
           <div className="flex items-center gap-2">
             <Lock size={13} style={{ color: "#bef532" }} />
-            <span className="font-label-sm text-label-sm uppercase tracking-[0.18em]" style={{ color: "#bef532" }}>New Time-Lock</span>
+            <span className="font-label-sm text-label-sm uppercase tracking-[0.18em]" style={{ color: "#bef532" }}>{releaseFrequency === "NONE" ? "New Time-Lock" : "Scheduled Allowance"}</span>
           </div>
           <h1 className="font-geist font-semibold text-[28px] text-white tracking-tight">Create Envelope</h1>
-          <p className="font-body-md text-body-md" style={{ color: "#b5b5b5" }}>Give this demo money a purpose and a maturity date.</p>
+          <p className="font-body-md text-body-md" style={{ color: "#b5b5b5" }}>Give this envelope a purpose and choose when its funds become available.</p>
         </div>
 
         {/* Available funds */}
@@ -193,7 +222,7 @@ export default function NewEnvelopePage() {
           {/* Amount */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="env-amount" className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>
-              Amount to Allocate (RWF) <span style={{ color: "#ff6b6b" }}>*</span>
+              {releaseFrequency === "NONE" ? "Amount to Allocate (RWF)" : "Total Amount to Lock (RWF)"} <span style={{ color: "#ff6b6b" }}>*</span>
             </label>
             <div className="relative">
               <input
@@ -241,8 +270,26 @@ export default function NewEnvelopePage() {
             {errors.category && <p className="flex items-center gap-1 font-body-sm text-body-sm" style={{ color: "#ff6b6b" }}><AlertCircle size={12} /> {errors.category}</p>}
           </div>
 
+          {/* Choose a fixed maturity or periodic allowance releases */}
+          <div className="flex flex-col gap-2">
+            <span className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>How should this money become available?</span>
+            <div className="grid grid-cols-3 gap-2">
+              {([
+                ["NONE", "All at once"],
+                ["DAILY", "Daily amount"],
+                ["WEEKLY", "Weekly amount"],
+              ] as const).map(([value, label]) => (
+                <button key={value} type="button" onClick={() => setReleaseFrequency(value)}
+                  className="rounded-lg px-2 py-3 font-body-sm text-body-sm font-medium"
+                  style={{ background: releaseFrequency === value ? "rgba(190,245,50,0.08)" : "#171717", border: `1px solid ${releaseFrequency === value ? "#bef532" : "#242424"}`, color: releaseFrequency === value ? "#bef532" : "#b5b5b5" }}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Maturity date */}
-          <div className="flex flex-col gap-1.5">
+          {releaseFrequency === "NONE" ? <div className="flex flex-col gap-1.5">
             <label htmlFor="env-maturity" className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>
               Maturity Date & Time <span style={{ color: "#ff6b6b" }}>*</span>
             </label>
@@ -254,7 +301,23 @@ export default function NewEnvelopePage() {
               ? <p className="flex items-center gap-1 font-body-sm text-body-sm" style={{ color: "#ff6b6b" }}><AlertCircle size={12} /> {errors.maturityDate}</p>
               : <p className="font-body-sm text-body-sm" style={{ color: "#808080" }}>Funds will be locked until this date.</p>
             }
-          </div>
+          </div> : <div className="flex flex-col gap-4 rounded-lg p-4" style={{ background: "#141414", border: "1px solid #242424" }}>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="env-release-amount" className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>
+                Amount released {releaseFrequency === "DAILY" ? "each day" : "each week"} (RWF) <span style={{ color: "#ff6b6b" }}>*</span>
+              </label>
+              <input id="env-release-amount" type="number" min={1} step={1} value={releaseAmount}
+                onChange={(e) => setReleaseAmount(e.target.value)} style={INPUT} placeholder="e.g. 2000" />
+              {errors.releaseAmount && <p className="font-body-sm text-body-sm" style={{ color: "#ff6b6b" }}>{errors.releaseAmount}</p>}
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="env-first-release" className="font-label-sm text-label-sm uppercase tracking-wider" style={{ color: "#808080" }}>First release</label>
+              <input id="env-first-release" type="datetime-local" value={firstReleaseAt} onChange={(e) => setFirstReleaseAt(e.target.value)} style={INPUT} />
+              {errors.firstReleaseAt
+                ? <p className="font-body-sm text-body-sm" style={{ color: "#ff6b6b" }}>{errors.firstReleaseAt}</p>
+                : <p className="font-body-sm text-body-sm" style={{ color: "#808080" }}>The rest stays locked. Missed days do not accumulate into a larger release.</p>}
+            </div>
+          </div>}
 
           <p className="font-body-sm text-body-sm text-center" style={{ color: "#808080" }}>
             ⚠ This is simulated demo money only. No real funds are moved.
